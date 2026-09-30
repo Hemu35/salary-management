@@ -117,4 +117,46 @@ test.describe('Authentication & Tenant Context E2E Browser Automation', () => {
     await page.fill('#password', '');
     await expect(submitBtn).toBeDisabled();
   });
+
+  test('Organization Admin can switch domain scope between All Domains and specific domains', async ({ page }) => {
+    await page.click('button:has-text("Fill Org Admin")');
+    await page.click('button[type="submit"]');
+
+    // Verify initial global scope
+    const domainSelect = page.locator('#domain-select');
+    await expect(domainSelect).toBeVisible();
+    await expect(domainSelect).toBeEnabled();
+    await expect(domainSelect).toHaveValue('all');
+    await expect(page.locator('.domain-scope-display')).toHaveText('All Domains (Global)');
+
+    // Switch to Engineering
+    await domainSelect.selectOption('1');
+    await expect(domainSelect).toHaveValue('1');
+    await expect(page.locator('.domain-scope-display')).toHaveText('Engineering');
+
+    // Switch to Sales & Marketing
+    await domainSelect.selectOption('2');
+    await expect(domainSelect).toHaveValue('2');
+    await expect(page.locator('.domain-scope-display')).toHaveText('Sales & Marketing');
+
+    // Switch back to All Domains
+    await domainSelect.selectOption('all');
+    await expect(domainSelect).toHaveValue('all');
+    await expect(page.locator('.domain-scope-display')).toHaveText('All Domains (Global)');
+  });
+
+  test('HR Manager domain scope is locked and restricted to assigned domain', async ({ page }) => {
+    await page.click('button:has-text("Fill HR Manager")');
+    await page.click('button[type="submit"]');
+
+    // Verify domain select is disabled and locked to Engineering
+    const domainSelect = page.locator('#domain-select');
+    await expect(domainSelect).toBeVisible();
+    await expect(domainSelect).toBeDisabled();
+    await expect(domainSelect).toHaveValue('1');
+
+    // Verify restricted badge and dashboard display
+    await expect(page.locator('.domain-restricted-badge')).toHaveText('Restricted');
+    await expect(page.locator('.domain-scope-display')).toHaveText('Engineering');
+  });
 });

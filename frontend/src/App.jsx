@@ -1,10 +1,12 @@
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { DomainProvider, useDomain } from './context/DomainContext';
 import Navbar from './components/Navbar';
 import LoginForm from './components/LoginForm';
 import './App.css';
 
 function MainContent() {
   const { user, loading } = useAuth();
+  const { isAllDomains, activeDomain } = useDomain();
 
   if (loading) {
     return (
@@ -46,6 +48,18 @@ function MainContent() {
             </div>
 
             <div className="status-card">
+              <span className="status-label">Active Domain Scope</span>
+              <span className="status-value domain-scope-display">
+                {isAllDomains ? 'All Domains (Global)' : activeDomain?.name || 'Scoped Domain'}
+              </span>
+              <span className="status-help">
+                {isOrgAdmin
+                  ? 'Can switch between all departments or filter to a single domain'
+                  : 'Enforced scope for directory and compensation visibility'}
+              </span>
+            </div>
+
+            <div className="status-card">
               <span className="status-label">Tenant Isolation</span>
               <span className="status-value status-active">Active (PostgreSQL RLS)</span>
               <span className="status-help">Defense-in-depth row-level tenant boundary enforced</span>
@@ -73,7 +87,9 @@ function MainContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <MainContent />
+      <DomainProvider>
+        <MainContent />
+      </DomainProvider>
     </AuthProvider>
   );
 }

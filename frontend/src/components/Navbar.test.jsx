@@ -2,6 +2,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Navbar from './Navbar';
 import * as AuthContextModule from '../context/AuthContext';
+import { DomainProvider } from '../context/DomainContext';
+
+function renderNavbar() {
+  return render(
+    <DomainProvider>
+      <Navbar />
+    </DomainProvider>
+  );
+}
 
 describe('Navbar Component', () => {
   const mockLogout = vi.fn();
@@ -16,7 +25,7 @@ describe('Navbar Component', () => {
       logout: mockLogout,
     });
 
-    const { container } = render(<Navbar />);
+    const { container } = renderNavbar();
     expect(container.firstChild).toBeNull();
   });
 
@@ -31,7 +40,7 @@ describe('Navbar Component', () => {
       logout: mockLogout,
     });
 
-    render(<Navbar />);
+    renderNavbar();
 
     expect(screen.getByText('Wayne Enterprises')).toBeInTheDocument();
     expect(screen.getByText('hr@example.com')).toBeInTheDocument();
@@ -49,9 +58,25 @@ describe('Navbar Component', () => {
       logout: mockLogout,
     });
 
-    render(<Navbar />);
+    renderNavbar();
 
     expect(screen.getByText('Org Admin')).toBeInTheDocument();
+  });
+
+  it('renders domain scope selector when user is authenticated', () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: {
+        id: 2,
+        email: 'admin@example.com',
+        role: 'organization_admin',
+        tenant: { id: 10, name: 'Wayne Enterprises' },
+      },
+      logout: mockLogout,
+    });
+
+    renderNavbar();
+
+    expect(screen.getByLabelText(/Select domain scope/i)).toBeInTheDocument();
   });
 
   it('triggers logout when Sign out button is clicked', () => {
@@ -65,7 +90,7 @@ describe('Navbar Component', () => {
       logout: mockLogout,
     });
 
-    render(<Navbar />);
+    renderNavbar();
 
     const signoutBtn = screen.getByRole('button', { name: /Sign out/i });
     fireEvent.click(signoutBtn);

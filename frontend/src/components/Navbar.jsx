@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import DomainSelector from './DomainSelector';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -15,6 +16,10 @@ export default function Navbar() {
           <span className="brand-title">Compensation OS</span>
           <span className="brand-tenant">{user.tenant?.name}</span>
         </div>
+      </div>
+
+      <div className="navbar-center">
+        <DomainSelector />
       </div>
 
       <div className="navbar-actions">

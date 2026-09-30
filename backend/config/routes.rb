@@ -1,10 +1,29 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # Health checks — liveness must not require auth (used by ECS/ALB)
+  get "/health/live",  to: "health#live"
+  get "/health/ready", to: "health#ready"
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  namespace :api do
+    # Authentication
+    resource :session, only: [ :create, :show, :destroy ]
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+    # Employee management (tenant + domain scoped)
+    resources :employees, only: [ :index, :create, :show, :update ] do
+      resources :compensation, only: [ :index, :create ], controller: "compensations"
+    end
+
+    # Async CSV import
+    resources :imports, only: [ :create, :show ]
+
+    # Async CSV export
+    resources :exports, only: [ :create, :show ] do
+      member { get :download }
+    end
+
+    # Analytics / Reports
+    namespace :reports do
+      get :workforce
+      get :compensation
+    end
+  end
 end

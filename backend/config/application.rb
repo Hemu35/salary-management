@@ -40,5 +40,16 @@ module Backend
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # Re-add session middleware — needed for session-based cookie auth (v2.5 LLD)
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore,
+      key: "_compensation_session",
+      same_site: :lax,
+      secure: Rails.env.production?,
+      httponly: true
+
+    # Allow all hosts (HostAuthorization managed per-environment)
+    config.hosts.clear
   end
 end

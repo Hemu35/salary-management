@@ -10,6 +10,9 @@ RSpec.describe "PostgreSQL Row-Level Security (RLS) Tenant Isolation", type: :mo
   let!(:domain_a) { create(:domain, tenant: tenant_a, name: "Engineering Alpha") }
   let!(:domain_b) { create(:domain, tenant: tenant_b, name: "Engineering Beta") }
 
+  let!(:employee_a) { create(:employee, tenant: tenant_a, domain: domain_a) }
+  let!(:employee_b) { create(:employee, tenant: tenant_b, domain: domain_b) }
+
   def execute_as_tenant(tenant, &block)
     ActiveRecord::Base.transaction do
       ActiveRecord::Base.connection.execute("SET LOCAL ROLE app_user")
@@ -40,17 +43,25 @@ RSpec.describe "PostgreSQL Row-Level Security (RLS) Tenant Isolation", type: :mo
         expect(User.pluck(:id)).not_to include(user_b.id)
         expect(Domain.pluck(:id)).to contain_exactly(domain_a.id)
         expect(Domain.pluck(:id)).not_to include(domain_b.id)
+        expect(Employee.pluck(:id)).to contain_exactly(employee_a.id)
+        expect(Employee.pluck(:id)).not_to include(employee_b.id)
 
         # Raw SQL queries
         raw_user_ids = ActiveRecord::Base.connection.select_values("SELECT id FROM users").map(&:to_i)
         expect(raw_user_ids).to contain_exactly(user_a.id)
         expect(raw_user_ids).not_to include(user_b.id)
+
+        raw_employee_ids = ActiveRecord::Base.connection.select_values("SELECT id FROM employees").map(&:to_i)
+        expect(raw_employee_ids).to contain_exactly(employee_a.id)
+        expect(raw_employee_ids).not_to include(employee_b.id)
       end
 
       execute_as_tenant(tenant_b) do
         expect(User.pluck(:id)).to contain_exactly(user_b.id)
         expect(User.pluck(:id)).not_to include(user_a.id)
         expect(Domain.pluck(:id)).to contain_exactly(domain_b.id)
+        expect(Employee.pluck(:id)).to contain_exactly(employee_b.id)
+        expect(Employee.pluck(:id)).not_to include(employee_a.id)
       end
     end
 
@@ -58,6 +69,7 @@ RSpec.describe "PostgreSQL Row-Level Security (RLS) Tenant Isolation", type: :mo
       execute_without_tenant do
         expect(User.count).to eq(0)
         expect(Domain.count).to eq(0)
+        expect(Employee.count).to eq(0)
       end
     end
 

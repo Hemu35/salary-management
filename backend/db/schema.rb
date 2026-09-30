@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_000005) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -22,6 +22,27 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_000005) do
     t.datetime "updated_at", null: false
     t.index ["tenant_id", "name"], name: "index_domains_on_tenant_id_and_name", unique: true
     t.index ["tenant_id"], name: "index_domains_on_tenant_id"
+  end
+
+  create_table "employees", force: :cascade do |t|
+    t.bigint "tenant_id", null: false
+    t.bigint "domain_id", null: false
+    t.string "employee_number", null: false
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.string "email", null: false
+    t.string "country_code", limit: 2, null: false
+    t.string "job_title", null: false
+    t.string "employment_status", default: "active", null: false
+    t.date "hire_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain_id"], name: "index_employees_on_domain_id"
+    t.index ["tenant_id", "domain_id"], name: "index_employees_on_tenant_id_and_domain_id"
+    t.index ["tenant_id", "email"], name: "index_employees_on_tenant_id_and_email", unique: true
+    t.index ["tenant_id", "employee_number"], name: "index_employees_on_tenant_id_and_employee_number", unique: true
+    t.index ["tenant_id", "employment_status"], name: "index_employees_on_tenant_id_and_employment_status"
+    t.index ["tenant_id"], name: "index_employees_on_tenant_id"
   end
 
   create_table "tenants", force: :cascade do |t|
@@ -60,6 +81,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_000005) do
   end
 
   add_foreign_key "domains", "tenants"
+  add_foreign_key "employees", "domains", on_delete: :cascade
+  add_foreign_key "employees", "tenants", on_delete: :cascade
   add_foreign_key "user_domain_assignments", "domains"
   add_foreign_key "user_domain_assignments", "tenants"
   add_foreign_key "user_domain_assignments", "users"

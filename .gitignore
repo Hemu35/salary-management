@@ -1,0 +1,41 @@
+# Logs & OS
+*.log
+*.swp
+.DS_Store
+Thumbs.db
+
+# Extracted txt files (temp, not part of codebase)
+*.txt
+extract_docs.ps1
+
+# Rails
+backend/.bundle/
+backend/log/
+backend/tmp/
+backend/storage/
+backend/.byebug_history
+backend/node_modules/
+backend/public/packs/
+backend/public/assets/
+backend/.env
+backend/config/master.key
+
+# React / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Docker
+*.override.yml
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*

@@ -1,0 +1,37 @@
+source "https://rubygems.org"
+
+gem "rails", "~> 7.2.4"
+gem "pg", "~> 1.1"
+gem "puma", ">= 5.0"
+gem "bootsnap", require: false
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+
+# Auth — secure password hashing (has_secure_password)
+gem "bcrypt", "~> 3.1.7"
+
+# CORS — allow React SPA to call Rails API across origins
+gem "rack-cors"
+
+# Pagination — database-backed pagination for 10,000-employee dataset
+gem "kaminari"
+
+# Background jobs — async CSV import/export (P0 in v2.5)
+gem "sidekiq", "~> 7.0"
+
+# File storage — CSV uploads and generated exports
+gem "aws-sdk-s3", "~> 1.0", require: false
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "brakeman", require: false
+  gem "rubocop-rails-omakase", require: false
+
+  # TDD stack — RSpec as specified in assessment
+  gem "rspec-rails", "~> 7.0"
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "shoulda-matchers", "~> 5.0"
+  gem "database_cleaner-active_record"
+end
+
+

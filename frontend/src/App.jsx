@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import LoginForm from './components/LoginForm';
 import './App.css';
 
+import EmployeeDirectory from './components/EmployeeDirectory';
+
 function MainContent() {
   const { user, loading } = useAuth();
   const { isAllDomains, activeDomain } = useDomain();
@@ -72,12 +74,7 @@ function MainContent() {
             </div>
           </div>
 
-          <div className="module-placeholder">
-            <h3>Directory & Compensation Modules</h3>
-            <p>
-              Authentication and tenant boundary context are verified. Employee records and compensation history will load here.
-            </p>
-          </div>
+          <EmployeeDirectory />
         </div>
       </main>
     </div>

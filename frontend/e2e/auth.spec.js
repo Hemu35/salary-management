@@ -130,13 +130,11 @@ test.describe('Authentication & Tenant Context E2E Browser Automation', () => {
     await expect(page.locator('.domain-scope-display')).toHaveText('All Domains (Global)');
 
     // Switch to Engineering
-    await domainSelect.selectOption('1');
-    await expect(domainSelect).toHaveValue('1');
+    await domainSelect.selectOption({ label: 'Engineering' });
     await expect(page.locator('.domain-scope-display')).toHaveText('Engineering');
 
     // Switch to Sales & Marketing
-    await domainSelect.selectOption('2');
-    await expect(domainSelect).toHaveValue('2');
+    await domainSelect.selectOption({ label: 'Sales & Marketing' });
     await expect(page.locator('.domain-scope-display')).toHaveText('Sales & Marketing');
 
     // Switch back to All Domains
@@ -153,7 +151,7 @@ test.describe('Authentication & Tenant Context E2E Browser Automation', () => {
     const domainSelect = page.locator('#domain-select');
     await expect(domainSelect).toBeVisible();
     await expect(domainSelect).toBeDisabled();
-    await expect(domainSelect).toHaveValue('1');
+    await expect(domainSelect.locator('option:checked')).toHaveText('Engineering');
 
     // Verify restricted badge and dashboard display
     await expect(page.locator('.domain-restricted-badge')).toHaveText('Restricted');

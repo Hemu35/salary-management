@@ -14,6 +14,7 @@ RSpec.describe "Api::Sessions", type: :request do
         expect(json["role"]).to eq("hr_manager")
         expect(json["tenant"]["id"]).to eq(tenant.id)
         expect(json["tenant"]["name"]).to eq("Stark Industries")
+        expect(json["domains"]).to be_an(Array)
         expect(json).not_to have_key("password_digest")
         expect(json).not_to have_key("password")
       end

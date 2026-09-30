@@ -34,6 +34,7 @@ module Api
     private
 
     def serialize_user(user)
+      domains_scope = user.organization_admin? ? user.tenant.domains.active : user.domains
       {
         id: user.id,
         email: user.email,
@@ -41,7 +42,10 @@ module Api
         tenant: {
           id: user.tenant.id,
           name: user.tenant.name
-        }
+        },
+        domains: domains_scope.order(:id).map do |d|
+          { id: d.id, name: d.name }
+        end
       }
     end
   end

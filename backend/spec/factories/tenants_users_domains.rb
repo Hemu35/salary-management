@@ -15,6 +15,10 @@ FactoryBot.define do
       role { "organization_admin" }
     end
 
+    trait :org_admin do
+      role { "organization_admin" }
+    end
+
     trait :hr_manager do
       role { "hr_manager" }
     end

@@ -10,9 +10,42 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_000006) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_000007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "compensation_components", force: :cascade do |t|
+    t.bigint "tenant_id", null: false
+    t.bigint "compensation_record_id", null: false
+    t.string "component_type", limit: 30, null: false
+    t.decimal "amount", precision: 15, scale: 2, default: "0.0", null: false
+    t.decimal "percentage", precision: 5, scale: 2
+    t.string "frequency", limit: 20, default: "annual", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["compensation_record_id", "component_type"], name: "index_comp_components_on_record_and_type"
+    t.index ["compensation_record_id"], name: "index_compensation_components_on_compensation_record_id"
+    t.index ["tenant_id"], name: "index_compensation_components_on_tenant_id"
+  end
+
+  create_table "compensation_records", force: :cascade do |t|
+    t.bigint "tenant_id", null: false
+    t.bigint "employee_id", null: false
+    t.date "effective_date", null: false
+    t.string "currency", limit: 3, default: "USD", null: false
+    t.string "pay_frequency", limit: 20, default: "annual", null: false
+    t.string "status", limit: 20, default: "active", null: false
+    t.bigint "created_by_id"
+    t.bigint "approved_by_id"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id", "effective_date"], name: "index_compensation_records_on_employee_id_and_effective_date"
+    t.index ["employee_id"], name: "index_compensation_records_on_employee_id"
+    t.index ["tenant_id", "employee_id", "effective_date"], name: "index_comp_records_on_tenant_emp_and_date"
+    t.index ["tenant_id", "status"], name: "index_compensation_records_on_tenant_id_and_status"
+    t.index ["tenant_id"], name: "index_compensation_records_on_tenant_id"
+  end
 
   create_table "domains", force: :cascade do |t|
     t.bigint "tenant_id", null: false
@@ -80,6 +113,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_000006) do
     t.index ["tenant_id"], name: "index_users_on_tenant_id"
   end
 
+  add_foreign_key "compensation_components", "compensation_records", on_delete: :cascade
+  add_foreign_key "compensation_components", "tenants", on_delete: :cascade
+  add_foreign_key "compensation_records", "employees", on_delete: :cascade
+  add_foreign_key "compensation_records", "tenants", on_delete: :cascade
+  add_foreign_key "compensation_records", "users", column: "approved_by_id", on_delete: :nullify
+  add_foreign_key "compensation_records", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "domains", "tenants"
   add_foreign_key "employees", "domains", on_delete: :cascade
   add_foreign_key "employees", "tenants", on_delete: :cascade

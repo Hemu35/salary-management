@@ -1,6 +1,7 @@
 class Employee < ApplicationRecord
   belongs_to :tenant
   belongs_to :domain
+  has_many :compensation_records, dependent: :destroy
 
   STATUSES = %w[active terminated on_leave].freeze
 

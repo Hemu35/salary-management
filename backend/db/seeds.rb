@@ -89,9 +89,70 @@ employees_data.each do |data|
   emp.save!
 end
 
+# Seed initial compensation packages
+comp_packages = {
+  "EMP0001" => {
+    currency: "USD",
+    effective_date: "2024-03-15",
+    components: [
+      { component_type: "base_salary", amount: BigDecimal("165000.00"), frequency: "annual" },
+      { component_type: "bonus", amount: BigDecimal("25000.00"), frequency: "annual" }
+    ]
+  },
+  "EMP0002" => {
+    currency: "GBP",
+    effective_date: "2024-07-01",
+    components: [
+      { component_type: "base_salary", amount: BigDecimal("95000.00"), frequency: "annual" },
+      { component_type: "bonus", amount: BigDecimal("10000.00"), frequency: "annual" }
+    ]
+  },
+  "EMP0003" => {
+    currency: "USD",
+    effective_date: "2023-11-10",
+    components: [
+      { component_type: "base_salary", amount: BigDecimal("140000.00"), frequency: "annual" },
+      { component_type: "commission", amount: BigDecimal("40000.00"), frequency: "annual" }
+    ]
+  },
+  "EMP0004" => {
+    currency: "INR",
+    effective_date: "2025-01-20",
+    components: [
+      { component_type: "base_salary", amount: BigDecimal("3500000.00"), frequency: "annual" },
+      { component_type: "bonus", amount: BigDecimal("350000.00"), frequency: "annual" }
+    ]
+  }
+}
+
+comp_packages.each do |emp_num, comp_info|
+  emp = Employee.find_by!(tenant: tenant, employee_number: emp_num)
+  rec = CompensationRecord.find_or_initialize_by(tenant: tenant, employee: emp, effective_date: comp_info[:effective_date])
+  rec.assign_attributes(
+    currency: comp_info[:currency],
+    pay_frequency: "annual",
+    status: "active",
+    notes: "Initial compensation package",
+    created_by: admin
+  )
+  rec.save!
+
+  comp_info[:components].each do |comp|
+    c = CompensationComponent.find_or_initialize_by(
+      tenant: tenant,
+      compensation_record: rec,
+      component_type: comp[:component_type]
+    )
+    c.assign_attributes(comp)
+    c.save!
+  end
+end
+
 puts "✅ Seeded Tenant: #{tenant.name}"
 puts "✅ Seeded Org Admin: #{admin.email} (password: password123)"
 puts "✅ Seeded HR Manager: #{hr.email} (password: password123)"
 puts "✅ Seeded Domains: #{engineering.name}, #{sales.name}"
 puts "✅ Seeded #{employees_data.count} demo employees across domains"
+puts "✅ Seeded demo compensation packages with components"
+
 

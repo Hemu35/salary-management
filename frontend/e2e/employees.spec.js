@@ -151,4 +151,41 @@ test.describe('Employee Directory E2E Browser Automation', () => {
     await expect(page.locator('.employee-table')).toContainText('Natasha Romanoff');
     await expect(page.locator('.employee-table')).toContainText(uniqueNumber);
   });
+
+  test('Opens Edit Employee modal, updates details, and reflects changes in directory table', async ({ page }) => {
+    await page.goto('/');
+    await page.click('button:has-text("Fill Org Admin")');
+    await page.click('button[type="submit"]');
+
+    // Wait for directory to be loaded
+    await expect(page.locator('.directory-titles h3')).toHaveText('Employee Directory');
+    await expect(page.locator('.employee-table')).toContainText('Alice Walker');
+
+    // Find Bob Martin's edit button and click it
+    const bobRow = page.locator('tr:has-text("Bob Martin")');
+    await expect(bobRow).toBeVisible();
+    await bobRow.locator('button:has-text("Edit")').click();
+
+    // Verify Edit Employee modal is open
+    const editModal = page.locator('.modal-overlay[role="dialog"]');
+    await expect(editModal).toBeVisible();
+    await expect(editModal.locator('#modal-edit-title')).toHaveText('Edit Employee');
+    await expect(editModal.locator('#edit-emp-number')).toHaveValue('EMP0002');
+    await expect(editModal.locator('#edit-emp-number')).toBeDisabled();
+    await expect(editModal.locator('#edit-first-name')).toHaveValue('Bob');
+    await expect(editModal.locator('#edit-last-name')).toHaveValue('Martin');
+
+    // Update Job Title
+    const newTitle = `Lead Infrastructure Architect ${Date.now().toString().slice(-3)}`;
+    await editModal.locator('#edit-job-title').fill(newTitle);
+
+    // Save changes
+    await editModal.locator('button[type="submit"]').click();
+
+    // Verify modal closes
+    await expect(editModal).not.toBeVisible();
+
+    // Verify updated title is displayed in Bob Martin's table row
+    await expect(page.locator('tr:has-text("Bob Martin")')).toContainText(newTitle);
+  });
 });

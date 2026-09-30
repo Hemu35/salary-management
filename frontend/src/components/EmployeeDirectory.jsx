@@ -3,6 +3,7 @@ import { useDomain } from '../context/DomainContext';
 import { fetchEmployees } from '../api/employees';
 import EmployeeTable from './EmployeeTable';
 import CreateEmployeeModal from './CreateEmployeeModal';
+import EditEmployeeModal from './EditEmployeeModal';
 
 export default function EmployeeDirectory() {
   const { selectedDomainId, activeDomain, isAllDomains } = useDomain();
@@ -26,6 +27,7 @@ export default function EmployeeDirectory() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
   useEffect(() => {
@@ -84,6 +86,10 @@ export default function EmployeeDirectory() {
   };
 
   const handleEmployeeCreated = () => {
+    setReloadTrigger((prev) => prev + 1);
+  };
+
+  const handleEmployeeUpdated = () => {
     setReloadTrigger((prev) => prev + 1);
   };
 
@@ -154,7 +160,11 @@ export default function EmployeeDirectory() {
         </div>
       </div>
 
-      <EmployeeTable employees={employees} loading={loading} />
+      <EmployeeTable
+        employees={employees}
+        loading={loading}
+        onEditEmployee={setEditingEmployee}
+      />
 
       {meta.total_count > 0 && (
         <div className="pagination-bar">
@@ -195,6 +205,13 @@ export default function EmployeeDirectory() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onEmployeeCreated={handleEmployeeCreated}
+      />
+
+      <EditEmployeeModal
+        isOpen={!!editingEmployee}
+        employee={editingEmployee}
+        onClose={() => setEditingEmployee(null)}
+        onEmployeeUpdated={handleEmployeeUpdated}
       />
     </div>
   );

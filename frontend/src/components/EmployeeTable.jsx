@@ -1,4 +1,4 @@
-export default function EmployeeTable({ employees, loading }) {
+export default function EmployeeTable({ employees, loading, onEditEmployee }) {
   if (loading) {
     return (
       <div className="table-loading" aria-live="polite">
@@ -49,6 +49,7 @@ export default function EmployeeTable({ employees, loading }) {
             <th>Country</th>
             <th>Status</th>
             <th>Hire Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -66,6 +67,16 @@ export default function EmployeeTable({ employees, loading }) {
               <td className="emp-country-cell">{formatCountry(emp.country_code)}</td>
               <td>{getStatusBadge(emp.employment_status)}</td>
               <td className="emp-date-cell">{emp.hire_date}</td>
+              <td className="emp-actions-cell">
+                <button
+                  type="button"
+                  className="btn-action-edit"
+                  onClick={() => onEditEmployee && onEditEmployee(emp)}
+                  aria-label={`Edit ${emp.first_name} ${emp.last_name}`}
+                >
+                  ✏️ Edit
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

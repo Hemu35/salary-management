@@ -54,4 +54,14 @@ describe('EmployeeTable Component', () => {
     expect(screen.getByText('Bob Martin')).toBeInTheDocument();
     expect(screen.getByText('Terminated')).toBeInTheDocument();
   });
+
+  it('calls onEditEmployee when Edit button is clicked', () => {
+    const onEditEmployee = vi.fn();
+    render(<EmployeeTable employees={mockEmployees} loading={false} onEditEmployee={onEditEmployee} />);
+
+    const editBtn = screen.getByRole('button', { name: /Edit Alice Walker/i });
+    editBtn.click();
+
+    expect(onEditEmployee).toHaveBeenCalledWith(mockEmployees[0]);
+  });
 });

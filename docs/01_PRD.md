@@ -2,15 +2,15 @@
 
 **Employee Salary & Compensation Management**
 
-*Incubyte Software Craftsperson / Ruby on Rails – Staff Assessment • Consolidated Clean Requirements*
+*Enterprise Staff Software Craftsperson / Ruby on Rails Assessment • Consolidated Clean Requirements*
 
 ---
 
 ## 1. Purpose, Revision Context, and Sources
 
-This document serves as the formal **Product Requirements Document (PRD)** for the multi-tenant Employee Salary & Compensation Management web application. It captures the complete product goals, architectural boundaries, user workflows, and acceptance criteria required for the Incubyte assessment.
+This document serves as the formal **Product Requirements Document (PRD)** for the multi-tenant Employee Salary & Compensation Management web application. It captures the complete product goals, architectural boundaries, user workflows, and acceptance criteria required for the assessment.
 
-The original Incubyte assessment brief remains the authoritative source for the assessment goals and required deliverables. Scope refinements captured in this document define the functional boundaries and acceptance criteria for completing the application, without expanding into full payroll execution.
+The original assessment specification remains the authoritative source for the assessment goals and required deliverables. Scope refinements captured in this document define the functional boundaries and acceptance criteria for completing the application, without expanding into full payroll execution.
 
 ---
 
@@ -43,7 +43,7 @@ Replace fragmented spreadsheets with a centralized, secure, multi-tenant web app
 
 ## 4. Requirements Explicitly Stated by the Assessment
 
-| Requirement Area | Specification from Incubyte Assessment Brief |
+| Requirement Area | Specification from Assessment Brief |
 | :--- | :--- |
 | **Dataset Scale** | Built for an organization with **10,000 employees across multiple countries**. |
 | **Full-Stack Scope** | End-to-end, fully functional software, including backend API and responsive UI. |
@@ -213,12 +213,12 @@ The system is considered complete and accepted when all the following criteria a
 - [x] **High-Level Design (HLD):** Architectural components, layers, and request flows ([`docs/02_HLD.md`](02_HLD.md)).
 - [x] **Low-Level Design (LLD):** Entity schemas, 22 API endpoints, and batch architecture ([`docs/03_LLD.md`](03_LLD.md)).
 - [x] **Architecture Diagram:** High-resolution topology diagram ([`docs/architecture_diagram.png`](architecture_diagram.png)).
-- [x] **Technical Architecture Review (TAR):** Security, isolation, and recovery baseline ([`docs/Incubyte_Employee_Compensation_TAR.md`](Incubyte_Employee_Compensation_TAR.md)).
+- [x] **Technical Architecture Review (TAR):** Security, isolation, and recovery baseline ([`docs/Employee_Compensation_TAR.md`](Employee_Compensation_TAR.md)).
 - [x] **Test Plan & Matrix:** 323 automated test cases and empirical benchmark evidence ([`docs/04_TEST_PLAN.md`](04_TEST_PLAN.md)).
 - [x] **Delivery Plan:** Milestone tracking from M0 to M6 ([`docs/05_DELIVERY_PLAN.md`](05_DELIVERY_PLAN.md)).
 - [x] **Architecture Decision Register (ADR):** Decisions D-01 through D-19 with trade-offs ([`docs/07_DECISION_LOG.md`](07_DECISION_LOG.md)).
 - [x] **AI Prompts & Instructions Catalog:** Verbatim prompts, human UI/UX steering, and engineering matrix ([`docs/AI_PROMPTS_AND_INSTRUCTIONS.md`](AI_PROMPTS_AND_INSTRUCTIONS.md)).
-- [x] **Official Incubyte AI Design Pack:** Standard prompt pack and methodology ([`docs/00_AI_PROMPTS_AND_DESIGN_PACK.md`](00_AI_PROMPTS_AND_DESIGN_PACK.md)).
+- [x] **AI Design Pack:** Standard prompt pack and methodology ([`docs/00_AI_PROMPTS_AND_DESIGN_PACK.md`](00_AI_PROMPTS_AND_DESIGN_PACK.md)).
 - [x] **Transparent AI Usage Log:** Chronological collaboration log across milestones ([`docs/06_AI_USAGE_LOG.md`](06_AI_USAGE_LOG.md)).
 - [x] **Demo Walkthrough Script:** Scene-by-scene recording script ([`docs/08_DEMO_SCRIPT.md`](08_DEMO_SCRIPT.md)).
 - [x] **Assessment README:** Turnkey setup, benchmark numbers, and credentials ([`docs/09_ASSESSMENT_README.md`](09_ASSESSMENT_README.md)).

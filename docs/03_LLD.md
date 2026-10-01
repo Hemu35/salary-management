@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Implemented Technical Design*
+*Enterprise Assessment • Implemented Technical Design*
 
 ---
 

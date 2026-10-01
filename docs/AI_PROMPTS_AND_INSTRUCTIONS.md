@@ -2,13 +2,13 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Staff Rails Assessment • AI Collaboration Artifact*
+*Enterprise Staff Rails Assessment • AI Collaboration Artifact*
 
 ---
 
 ## 1. Executive Summary & AI Development Methodology
 
-This assessment was developed using an **AI-accelerated, engineer-steered methodology**. In accordance with the Incubyte evaluation criteria, AI tools were used intentionally to accelerate boilerplate implementation, test generation, and architectural analysis, while **strict human engineering judgment** governed system architecture, security invariants, data integrity, and performance trade-offs.
+This assessment was developed using an **AI-accelerated, engineer-steered methodology**. In accordance with the assessment evaluation criteria, AI tools were used intentionally to accelerate boilerplate implementation, test generation, and architectural analysis, while **strict human engineering judgment** governed system architecture, security invariants, data integrity, and performance trade-offs.
 
 ### Core Engineering Invariants Enforced Across All Prompts:
 1. **Zero Client Trust:** Tenant ID and domain assignments must never be trusted from client parameters or headers; they are derived exclusively from verified JWT server-side claims.
@@ -31,7 +31,7 @@ Below is the complete record of prompts, system instructions, human steering, an
 ```markdown
 Context:
 We are building a multi-tenant Global Employee Compensation Management System for an organization with 10,000 employees across multiple countries and currencies, replacing spreadsheet-based tracking.
-Role: Incubyte Staff Software Craftsperson (Ruby on Rails + React).
+Role: Staff Software Craftsperson (Ruby on Rails + React).
 
 Task:
 1. Analyze the problem statement and draft a one-page Product Requirements Document (PRD) covering:
@@ -48,7 +48,7 @@ Task:
 
 #### Human Steering & AI Output Review:
 - **AI Proposal:** Suggested including a dynamic FX currency conversion service and microservices decomposition.
-- **Human Engineering Correction:** **Rejected.** Adhered strictly to the Incubyte prompt requirement: *"We are not looking for the most complex system, but for good engineering judgment."* FX rates introduce currency date drift and statutory payroll introduces jurisdiction complexity beyond assessment scope. We locked the scope to a clean, robust modular monolith with currency-segregated reporting.
+- **Human Engineering Correction:** **Rejected.** Adhered strictly to the core assessment requirement: *"We are not looking for the most complex system, but for good engineering judgment."* FX rates introduce currency date drift and statutory payroll introduces jurisdiction complexity beyond assessment scope. We locked the scope to a clean, robust modular monolith with currency-segregated reporting.
 
 ---
 
@@ -214,7 +214,7 @@ Also optimize `ExportJobWorker` using database cursors to stream 10,000 records 
 #### Prompt Given to AI:
 ```markdown
 Context:
-Incubyte assessment requires: "Seed script with 10,000 employees. Tests that are fast, deterministic, and easy to understand."
+Assessment specification requires: "Seed script with 10,000 employees. Tests that are fast, deterministic, and easy to understand."
 
 Task:
 1. Create a dedicated `BenchmarkSeedService` and Rake task `db:seed:benchmark`.

@@ -2,10 +2,10 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • AI Collaboration Record*
+*Enterprise Staff Assessment • AI Collaboration Record*
 
 ## Purpose
-This document records transparent AI assistance throughout the development of the Global Employee Compensation Management System, in accordance with the Incubyte assessment guidelines. Every AI-assisted code suggestion, architecture proposal, and test structure was independently reviewed, validated against specifications, and subjected to automated testing before acceptance.
+This document records transparent AI assistance throughout the development of the Global Employee Compensation Management System, in accordance with the assessment guidelines. Every AI-assisted code suggestion, architecture proposal, and test structure was independently reviewed, validated against specifications, and subjected to automated testing before acceptance.
 
 > **See Also:** For the complete verbatim prompt catalog, engineering instructions, and human steering matrix, refer to [`docs/AI_PROMPTS_AND_INSTRUCTIONS.md`](AI_PROMPTS_AND_INSTRUCTIONS.md).
 
@@ -19,11 +19,11 @@ This document records transparent AI assistance throughout the development of th
 | **Date / Milestone** | 2026-09-30 • Milestone 0 |
 | **Tool / Model** | Antigravity AI Assistant (Gemini 2.5 Pro) |
 | **Task / File / Area** | Requirements synthesis, ADR registration, HLD/LLD definitions ([`docs/01_PRD.md`](01_PRD.md), [`docs/02_HLD.md`](02_HLD.md), [`docs/03_LLD.md`](03_LLD.md), [`docs/07_DECISION_LOG.md`](07_DECISION_LOG.md)) |
-| **Prompt Summary** | Analyze Incubyte assessment requirements for multi-tenant employee compensation system. Define architecture boundaries, strict non-requirements (no statutory payroll or FX math), and ADRs. |
+| **Prompt Summary** | Analyze assessment requirements for multi-tenant employee compensation system. Define architecture boundaries, strict non-requirements (no statutory payroll or FX math), and ADRs. |
 | **Output Used** | Structured decision log (D-01 to D-17), layered architecture diagram specifications, and non-functional requirements. |
 | **Output Rejected / Modified** | Rejected suggestion to include dynamic FX currency conversion service or SQS/DLQ queues to avoid unnecessary complexity and keep scope strictly aligned with P0. |
 | **Human Review Performed** | Verified that multi-tenancy enforces server-side session identity and that domain-scoped access for HR Managers is explicitly decoupled from tenant isolation. |
-| **Tests / Validation Run** | Requirements cross-checked against Incubyte evaluation rubric. |
+| **Tests / Validation Run** | Requirements cross-checked against assessment evaluation rubric. |
 | **Security / Privacy Review** | Ensured no production secrets, tokens, or personal identifiers are stored in architecture or prompt definitions. |
 | **Follow-up / Limitations** | PostgreSQL RLS marked as defense in depth to be validated against actual PostgreSQL engine (not SQLite). |
 

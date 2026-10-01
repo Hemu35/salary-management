@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Milestone Tracking & Status*
+*Enterprise Assessment • Milestone Tracking & Status*
 
 ---
 
@@ -48,7 +48,7 @@
 
 ## 4. Submission Checklist
 
-- [x] **One-page requirements and architecture artifacts included** ([`docs/01_PRD.md`](docs/01_PRD.md), [`docs/02_HLD.md`](docs/02_HLD.md), [`docs/03_LLD.md`](docs/03_LLD.md), [`docs/Incubyte_Employee_Compensation_TAR.md`](docs/Incubyte_Employee_Compensation_TAR.md)).
+- [x] **One-page requirements and architecture artifacts included** ([`docs/01_PRD.md`](docs/01_PRD.md), [`docs/02_HLD.md`](docs/02_HLD.md), [`docs/03_LLD.md`](docs/03_LLD.md), [`docs/Employee_Compensation_TAR.md`](docs/Employee_Compensation_TAR.md)).
 - [x] **Git repository contains incremental commits and readable setup instructions** ([`README.md`](../README.md), [`docs/09_ASSESSMENT_README.md`](docs/09_ASSESSMENT_README.md)).
 - [x] **Deterministic 10,000 synthetic employee seed works** (`rake db:seed:benchmark` populates Globex Corporation in 6.12s with `srand(42)`).
 - [x] **Critical automated tests pass and commands are documented** (323/323: 230 RSpec, 62 Vitest, 31 Playwright E2E).

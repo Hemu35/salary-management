@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Staff Rails Assessment • Official Demo Recording Guide*
+*Enterprise Staff Rails Assessment • Official Demo Recording Guide*
 
 ---
 
@@ -55,7 +55,7 @@ The login screen features **One-Click Quick Login** buttons. If typing manually:
 - (Optional): Briefly show the architecture diagram ([`docs/architecture_diagram.png`](file:///C:/Users/himan/.gemini/antigravity/scratch/salary-management/docs/architecture_diagram.png)).
 
 **Narration / Script:**
-> *"Hello! Welcome to the demonstration of the Global Employee Compensation Management System, built for the Incubyte Staff Rails assessment.*
+> *"Hello! Welcome to the demonstration of the Global Employee Compensation Management System, built for the Enterprise Staff Rails assessment.*
 >
 > *This is an enterprise-grade multi-tenant SaaS application designed to replace spreadsheet-based compensation tracking with a centralized, secure platform. The stack is built with Ruby on Rails 7.2 API, React 19 with Vite, PostgreSQL 16 with Row-Level Security, and Sidekiq 7 with Redis for high-speed asynchronous processing.*
 >
@@ -275,7 +275,7 @@ The login screen features **One-Click Quick Login** buttons. If typing manually:
 > - *Safe currency-segregated workforce analytics.*
 > - *Production health checks and a 323-test automated quality suite.*
 >
-> *Thank you very much for watching, and thank you to the Incubyte team!"*
+> *Thank you very much for watching, and thank you for your time!"*
 
 ---
 

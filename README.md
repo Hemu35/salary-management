@@ -2,7 +2,7 @@
 
 A multi-tenant SaaS application for employee and compensation management across organizations, countries, and currencies.
 
-**Incubyte Staff Rails Assessment**
+**Enterprise Staff Rails Assessment**
 
 ---
 
@@ -173,11 +173,11 @@ npx.cmd playwright test
 
 | Document | Description |
 |----------|-------------|
-| [`docs/00_AI_PROMPTS_AND_DESIGN_PACK.md`](docs/00_AI_PROMPTS_AND_DESIGN_PACK.md) | Official Incubyte AI Prompts & Documentation Design Pack |
+| [`docs/00_AI_PROMPTS_AND_DESIGN_PACK.md`](docs/00_AI_PROMPTS_AND_DESIGN_PACK.md) | AI Prompts & Documentation Design Pack |
 | [`docs/01_PRD.md`](docs/01_PRD.md) | Product Requirements Document |
 | [`docs/02_HLD.md`](docs/02_HLD.md) | High-Level Architecture Design |
 | [`docs/03_LLD.md`](docs/03_LLD.md) | Low-Level Technical Design |
-| [`docs/Incubyte_Employee_Compensation_TAR.md`](docs/Incubyte_Employee_Compensation_TAR.md) | Technical Architecture Review |
+| [`docs/Employee_Compensation_TAR.md`](docs/Employee_Compensation_TAR.md) | Technical Architecture Review |
 | [`docs/04_TEST_PLAN.md`](docs/04_TEST_PLAN.md) | Test Plan & Verification Matrix |
 | [`docs/05_DELIVERY_PLAN.md`](docs/05_DELIVERY_PLAN.md) | Milestone Delivery Plan |
 | [`docs/06_AI_USAGE_LOG.md`](docs/06_AI_USAGE_LOG.md) | Transparent AI Usage Log |

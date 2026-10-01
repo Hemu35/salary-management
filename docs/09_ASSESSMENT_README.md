@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Completed Implementation*
+*Enterprise Staff Assessment • Completed Implementation*
 
 ---
 

@@ -1,6 +1,6 @@
 # AI Prompts, Architecture & Documentation Design Pack
 
-**Incubyte Software Craftsperson / Rails Assessment**  
+**Enterprise Software Craftsperson / Rails Assessment**  
 **Project:** Employee Salary & Compensation Management  
 **Purpose:** Reusable prompts for producing and reviewing the assessment’s product, architecture, engineering, and submission documents.
 
@@ -13,7 +13,7 @@
 Use this context at the beginning of each AI-assisted design or documentation task.
 
 ```text
-You are assisting with the Incubyte Software Craftsperson / Rails assessment.
+You are assisting with the Enterprise Software Craftsperson / Rails assessment.
 
 Assessment brief:
 Build functional employee salary-management software for an organization with
@@ -91,7 +91,7 @@ Prompting and output rules:
 ## 2. Prompt: Review and normalize the requirements baseline
 
 ```text
-Review the attached Incubyte assessment brief and the latest PRD.
+Review the attached assessment brief and the latest PRD.
 
 First extract the assessment's explicit requirements without adding features.
 Then separately list:

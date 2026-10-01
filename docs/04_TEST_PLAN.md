@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment*
+*Enterprise Staff Assessment*
 
 ## 1. Purpose
 

@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Implemented Architecture*
+*Enterprise Assessment • Implemented Architecture*
 
 ---
 

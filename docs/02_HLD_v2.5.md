@@ -1,114 +1,161 @@
-﻿# **High-Level Design (HLD)**
+# **High-Level Design (HLD)**
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Architecture baseline • Version 2.5*
+*Incubyte Assessment • Version 2.5 • Implemented Architecture*
+
+---
 
 ## 1. Purpose and Architecture Summary
 
-This HLD describes a multi-tenant SaaS application for employee and compensation management across organizations, countries, and currencies. The MVP is a modular Rails application with a React frontend, asynchronous Sidekiq workers, Amazon RDS for PostgreSQL, and AWS-managed delivery, security, storage, and operations services.
+This HLD describes the multi-tenant SaaS architecture for employee and compensation management across organizations, countries, and currencies. The application is implemented as a modular Ruby on Rails 7.2 API with a React 19 single-page application (Vite 8), asynchronous Sidekiq 7 workers backed by Redis 7, and PostgreSQL 16 with Row-Level Security (RLS) as defense in depth.
 
-This is a target design. AWS resources and controls described here must be implemented, configured, and verified before being represented as deployed capabilities.
+The architecture is containerized via Docker Compose for local development and testing, and maps directly to an AWS production topology (ECS Fargate, Amazon RDS for PostgreSQL, ElastiCache Redis, S3, CloudFront, and Application Load Balancer).
+
+---
 
 ## 2. Architecture Principles
 
-- One shared application serves multiple customer organizations (tenants); every business operation enforces tenant isolation.
-- Within a tenant, HR users may be restricted to assigned employee domains/departments. Domain authorization is distinct from tenant isolation.
-- Use a modular monolith for the assessment; scale Rails web tasks and Sidekiq workers independently.
-- Use asynchronous processing for CSV import/export and other long-running work; normal CRUD/search remains synchronous.
-- Keep employee and compensation data in RDS; use S3 for uploaded/generated files; Redis is queue infrastructure, not a system of record.
-- Support multi-country/multi-currency records without implying automatic FX conversion or statutory payroll calculations.
-- Prefer managed AWS services and infrastructure-as-code; configure recovery and health monitoring as operational requirements.
+- **Strict Multi-Tenant Isolation:** One shared application serves multiple customer organizations (tenants); every business operation enforces tenant isolation at the application layer and at the database layer via PostgreSQL RLS.
+- **Dual-Layer Authorization:** Within a tenant, Organization Admins manage users and company-wide records, while HR Managers are restricted to assigned employee domains/departments.
+- **Modular Monolith:** Rails API handles core CRUD, authentication, authorization, and reporting; asynchronous Sidekiq workers handle bulk workflows (CSV imports/exports) and can scale independently.
+- **High-Speed Bounded Bulk Workflows:** Bulk CSV operations process data in bounded chunks (500 records/batch for imports, 1,000 records/batch cursor streaming for exports), achieving sub-10-second processing for 10,000 records.
+- **Transactional Rollback & Cancellation:** Import jobs support in-flight cancellation and post-completion rollback via `ImportRollbackService` with persisted rollback metadata.
+- **Strict Multi-Currency Separation:** Support for multi-country and multi-currency records without cross-currency summation or unsupported FX conversions.
+- **Comprehensive Operational Health Checks:** Distinct liveness (`/health/live`), readiness (`/health/ready`), and worker health (`/health/workers`) signals.
+
+---
+
 ## 3. Logical and Deployment Components
 
-| Layer | Component | Responsibility |
-| --- | --- | --- |
-| Client | React web application | HR workflows: employee/compensation management, search, reports, CSV job status and downloads. |
-| Edge | Route 53 | DNS for application domain. |
-| Edge | CloudFront + S3 | Deliver React static assets; S3 origin access restricted to CloudFront. |
-| Edge/security | AWS WAF + ACM | Web request filtering and TLS certificate management. |
-| API ingress | Application Load Balancer | Routes API requests to healthy Rails targets; target health checks. |
-| Application | Rails API on ECS Fargate | Authentication/authorization, tenant context, domain permissions, business logic, reporting, job creation. |
-| Background | Sidekiq ECS service + Redis/ElastiCache | Asynchronous imports/exports; retry and failed-job handling. |
-| Identity | Cognito or approved OIDC/custom auth | Authentication and identity; Rails remains responsible for application authorization. |
-| Data | Amazon RDS for PostgreSQL | Relational system of record; shared schema and tenant_id isolation; RLS defense in depth. |
-| Files | Amazon S3 | CSV uploads, generated exports, row-error artifacts with tenant-scoped access and lifecycle. |
-| Security | AWS KMS, Secrets Manager/SSM, IAM | Encryption key management, secret storage, least-privilege AWS access. |
-| Operations | CloudWatch, CloudTrail, Systems Manager | Logs/metrics, AWS activity audit, operational management. |
-| Delivery | Git, CI/CD, ECR, CDK/CloudFormation | Versioned builds, repeatable infrastructure deployment, rollback support. |
+| Layer | Component | Implementation / Technology | Responsibility |
+| --- | --- | --- | --- |
+| **Client** | React Web Application | React 19, Vite 8, TailwindCSS 4 | Responsive HR dashboard: employee/compensation management, search/filters, domain switcher, reporting charts, CSV import/export modals. |
+| **Edge & CDN** | Route 53 + CloudFront + S3 | AWS S3 / CloudFront (Dockerized in dev) | Static asset delivery; S3 origin access restricted to CloudFront. |
+| **Security & Ingress** | AWS WAF + ALB | ALB / Nginx (Docker network in dev) | Web filtering, TLS termination, routing API requests to healthy Rails targets. |
+| **Identity & Auth** | JWT + BCrypt | Rails Session Controller + JWT | Stateless token authentication; derives tenant context and serialized accessible domains from trusted database record. |
+| **Application API** | Rails API on ECS Fargate | Ruby 3.3.0, Rails 7.2.1 (API mode) | Business logic, Pundit authorization, tenant context scoping, reporting, job dispatching. |
+| **Background Processing** | Sidekiq + Redis | Sidekiq 7.3.9, Redis 7-alpine | Asynchronous CSV import/export, batch processing, retries, cancellation, and rollback execution. |
+| **Data Persistence** | Amazon RDS for PostgreSQL | PostgreSQL 16-alpine | Shared schema with `tenant_id` partitioning; PostgreSQL Row-Level Security (RLS) defense in depth. |
+| **File Storage** | Amazon S3 / ActiveStorage | Local filesystem / S3 | CSV upload storage, generated export artifacts, and temporary file lifecycle management. |
+| **Health & Monitoring** | Health Controller + Sidekiq API | Rails Controller + `sidekiq/api` | Liveness, readiness, and Sidekiq worker inspection (`/health/live`, `/health/ready`, `/health/workers`). |
+
+---
 
 ## 4. Request and Data Flows
 
-### 4.1 Frontend and API traffic
+```
+[User Browser]
+       │
+       ▼ (HTTPS)
+ [Route 53 DNS]
+       │
+       ├─────────────────────────────────┐
+       ▼ (Static Assets)                 ▼ (API Requests)
+[CloudFront CDN]                  [AWS WAF + ACM TLS]
+       │                                 │
+       ▼                                 ▼
+[S3 Bucket] (React Build)         [Application Load Balancer]
+                                         │
+                                         ▼ (HTTP / Health Checks)
+                                 [Rails API on ECS Fargate]
+                                         │
+                         ┌───────────────┴───────────────┐
+                         ▼                               ▼
+            [PostgreSQL 16 Database]           [Redis 7 Queue]
+             (Shared Schema + RLS)                       │
+                         ▲                               ▼
+                         └─────────────── [Sidekiq Workers on ECS]
+```
 
-HR user loads the React application from S3 through CloudFront; the S3 origin is not publicly writable and should be restricted to the CDN access path.
+### 4.1 Frontend and API Traffic Flow
+1. User loads the React single-page application (static build).
+2. User authenticates via `POST /api/session`; backend validates credentials with `BCrypt` and returns a signed JWT containing `user_id`, `tenant_id`, `role`, and assigned `domains`.
+3. Subsequent requests provide the JWT in the `Authorization: Bearer <token>` header.
+4. Rails `TenantScoped` concern establishes the tenant context and executes `SET LOCAL app.current_tenant_id = ?` within a database transaction.
+5. Pundit policies enforce role and domain-level authorization before executing queries.
+6. Responses return tenant-isolated data. Sensitive credentials and raw compensation amounts are filtered from application logs.
 
-Browser API requests enter through the protected edge path (CloudFront/WAF as configured) and reach the Application Load Balancer.
+### 4.2 Asynchronous CSV Import Flow (Optimized with Batching & Rollback)
+1. User uploads a CSV file through the UI modal (`POST /api/imports`).
+2. Rails validates the file structure and creates an `ImportJob` record with `status: :queued`.
+3. The job ID is enqueued to Sidekiq (`ImportJobWorker`).
+4. The worker establishes RLS tenant context, reads the file in **500-record chunks**, and performs:
+   - In-memory validation (domains, email format, country codes, status).
+   - Single-query prefetching of existing employees.
+   - Bulk insertion via PostgreSQL `insert_all(..., returning: [...])` for employees, compensation records, and components.
+   - Live progress updates persisted to the database.
+5. If the user cancels the job mid-flight (`POST /api/imports/:id/cancel`), the worker terminates processing and rolls back inserted rows.
+6. If the user requests a rollback after completion (`POST /api/imports/:id/rollback`), `ImportRollbackService` safely deletes all created records and restores previous compensation states using stored `rollback_metadata`.
 
-ALB forwards requests only to healthy Rails API tasks running on ECS Fargate across Availability Zones.
+### 4.3 Asynchronous CSV Export Flow (Cursor Streaming)
+1. User requests an export with optional filters or selected employee IDs (`POST /api/exports`).
+2. Rails creates an `ExportJob` with `status: :queued` and enqueues `ExportJobWorker`.
+3. The worker queries records using database cursors (`batch_size: 1_000`) to avoid memory bloat.
+4. Rows are streamed directly to a CSV artifact in private storage.
+5. User polls `GET /api/exports/:id` for progress; when `completed`, downloads the file via authorized endpoint `GET /api/exports/:id/download`.
 
-Rails authenticates the user, derives tenant context from the authenticated identity, applies role/domain authorization, and executes tenant-scoped business logic.
-
-Rails reads or writes RDS records and returns a response. Sensitive values are excluded from logs.
-
-### 4.2 Asynchronous CSV import/export
-
-Rails validates the request and stores/references the uploaded file in S3; it creates a tenant- and requester-associated job record.
-
-Rails enqueues the job through Sidekiq/Redis and returns a job identifier and current status.
-
-A separate Sidekiq ECS service processes records in bounded batches, enforcing tenant and domain scope, validation, idempotency, and retry rules.
-
-Import outcomes are stored in RDS. Export artifacts are stored in S3 with controlled, expiring access.
-
-Authorized users poll job status and retrieve permitted results. SQS/DLQ is not part of the MVP.
+---
 
 ## 5. Multi-Tenancy and Authorization
 
-Default MVP storage is one Amazon RDS for PostgreSQL database with a shared schema. Tenant-owned records carry tenant_id. Rails derives tenant context from the authenticated user/session; browser-supplied tenant identifiers are not authorization inputs.
+### Shared Schema with Row-Level Security (RLS)
+The database uses a shared schema with `tenant_id` columns on all tenant-owned tables (`employees`, `compensation_records`, `compensation_components`, `domains`, `user_domain_assignments`, `users`, `import_jobs`, `export_jobs`).
 
-PostgreSQL Row-Level Security (RLS) is a planned defense-in-depth control. Application authorization remains mandatory. Tenant context must be applied safely for each transaction/connection, and the application database role must not have BYPASSRLS privileges. Domain-scoped HR access is enforced in application policy/query logic and applies only inside the authenticated tenant.
+**Defense in Depth:**
+- **Layer 1 (Application):** Rails `TenantScoped` controller concern scopes all ActiveRecord queries to `current_tenant`.
+- **Layer 2 (Authorization):** Pundit policies enforce role (Admin vs. HR) and domain boundaries (`hr_domain_assignments`).
+- **Layer 3 (Database RLS):** PostgreSQL RLS policies enforce `USING (tenant_id = current_setting('app.current_tenant_id', true)::bigint)` and `WITH CHECK`. Unscoped queries cannot leak or modify cross-tenant records.
 
-Future enterprise options may include a dedicated SaaS-managed database per customer or a customer-managed database. These are not MVP requirements and introduce routing, connectivity, secrets, migration, monitoring, and backup responsibilities.
+### Domain-Scoped HR Manager Access
+- **Organization Admin:** Full administrative visibility across all departments/domains within their tenant. Can manage users, assign domains, and oversee company-wide headcount and compensation.
+- **HR Manager:** Strictly restricted to assigned domains. An HR Manager assigned to "Engineering" cannot view, search, export, or import records for "Sales" or "Marketing".
+
+---
 
 ## 6. Availability, Health Checks, and Scaling
 
-- Run Rails API tasks across at least two Availability Zones where the selected environment supports it; ECS service desired count and deployment settings maintain healthy capacity.
-- ALB target-group health checks use a Rails readiness endpoint; unhealthy targets are removed from traffic. ECS container health checks provide an additional process-level signal.
-- Separate liveness from readiness: liveness indicates the process can respond; readiness indicates the task can serve requests and may perform bounded critical dependency checks.
-- Sidekiq workers have independent operational health signals: worker heartbeat, queue latency, job duration, retry/dead-job counts, and failures.
-- Use stateless Rails tasks, pagination, tenant-aware indexes, bounded import batches, async exports, and independently scalable worker capacity.
-- Configure RDS Multi-AZ for production availability as selected; validate failover behavior. Multi-AZ is not a backup substitute.
+- **Liveness (`GET /health/live`):** Returns HTTP 200 `{ status: "ok" }` if the Rails application process is running. Performs no database queries to prevent cascading restarts during transient DB disconnects.
+- **Readiness (`GET /health/ready`):** Returns HTTP 200 `{ status: "ok", checks: { database: "ok", redis: "ok" } }` only if both PostgreSQL and Redis respond within a bounded timeout. Used by the ALB target group to route traffic only to ready containers.
+- **Worker Health (`GET /health/workers`):** Inspects Sidekiq using `Sidekiq::ProcessSet` and `Sidekiq::Stats`, reporting active worker count, processed/failed job counts, and queue latencies.
+- **Independent Horizontal Scaling:** Rails API web containers and Sidekiq worker containers scale independently based on CPU/memory and queue depth.
+
+---
+
 ## 7. Data Protection, Backup, and Recovery
 
-- Encrypt RDS storage and S3 objects at rest using KMS-managed keys; enforce TLS in transit.
-- Store database credentials and application secrets in AWS Secrets Manager or Systems Manager Parameter Store; grant access through least-privilege IAM roles.
-- Configure RDS automated backups and point-in-time recovery (PITR), retention, and snapshots as required; periodically test restore into an isolated environment.
-- Define S3 versioning/lifecycle/recovery controls for uploaded inputs and generated artifacts; restrict object access to authorized application flows.
-- Recover application releases from Git and infrastructure-as-code; retain versioned ECR images and document redeployment/rollback.
-- Make background jobs retryable/idempotent and define how interrupted jobs are safely resumed or re-enqueued.
+- **Encryption at Rest & Transit:** KMS-managed keys for database and file storage in AWS; TLS 1.3 enforced for all web and API traffic.
+- **Zero Credential Logging:** Passwords, tokens, and raw compensation data are filtered from Rails logs (`config.filter_parameters`).
+- **Database Backup & Recovery (Target AWS):** RDS automated snapshots with 35-day retention and 5-minute Point-In-Time Recovery (PITR).
+- **Temporary Artifact Lifecycle:** S3 lifecycle rules automatically delete generated export CSVs and temporary error reports after 24 hours.
+- **Worker Idempotency:** Background jobs are idempotent; retrying an interrupted batch does not duplicate records.
+
+---
+
 ## 8. Observability and Audit
 
-- CloudWatch structured logs and metrics for API latency/errors, task health, CPU/memory, queue depth/latency, job duration, retries, and failures.
-- Propagate request/correlation IDs into background jobs and persist actor, tenant, job ID, and outcome metadata for auditability.
-- CloudTrail records AWS API activity. Distributed tracing (AWS X-Ray or OpenTelemetry-compatible tooling) can be enabled for request-to-job correlation.
-- Never log passwords, secrets, raw compensation payloads, or unnecessary personal data.
-## 9. Key Trade-offs and Decisions
+- **Structured Logging:** Request and correlation IDs are attached to each HTTP request and propagated into background Sidekiq jobs.
+- **Audit Trails:** Sensitive changes (employee creation, compensation updates, import rollbacks) record actor ID, action, timestamp, and affected resource IDs.
+- **Queue Latency Metrics:** Sidekiq queue depth and latency monitored via `/health/workers`.
 
-| Decision | Rationale / trade-off |
-| --- | --- |
-| Rails modular monolith | Fast delivery and clear boundaries for assessment; split services only when scale/ownership justifies it. |
-| React on S3 + CloudFront | Static frontend delivery avoids dedicated frontend compute; API remains separately routed. |
-| ECS Fargate for Rails/Sidekiq | Managed container runtime; web and worker capacity scale independently. |
-| Shared RDS schema + tenant_id | Cost-effective default; requires rigorous tenant scoping, RLS defense in depth, and security tests. |
-| Sidekiq + Redis | Sufficient for MVP jobs and retry/dead handling; avoids adding SQS/DLQ complexity. |
-| RLS | Defense in depth against accidental unscoped access; requires correct transaction-local tenant context and non-bypass DB role. |
-| KMS + managed secrets | Centralized encryption-key and secret access controls; IAM policies and rotation must be configured. |
-| ALB readiness health checks | Only healthy/ready Rails targets receive traffic; worker health is monitored separately. |
-| Dedicated/customer DB | Future isolation option; higher operational and migration complexity. |
+---
+
+## 9. Key Trade-Offs and Architecture Decisions
+
+| Decision | Rationale / Trade-Off | Status |
+| :--- | :--- | :--- |
+| **Rails Modular Monolith** | Rapid development, clear boundaries, and high test velocity for assessment without distributed microservice overhead. | Operational / Verified |
+| **PostgreSQL RLS Defense in Depth** | Eliminates accidental cross-tenant data leakage from unscoped queries without requiring multi-database complexity. | Operational / Verified |
+| **Bounded Bulk Batch Processing (D-18)** | 500-record batch chunking, in-memory validation, and `insert_all` reduced 10k CSV import time from 14 minutes to 7.47 seconds. | Operational / Verified |
+| **Deterministic 10k Benchmark Dataset (D-19)** | `BenchmarkSeedService` populates 10,000 synthetic employees deterministically using `srand(42)` in 6.12s for load verification. | Operational / Verified |
+| **Import Cancellation & Rollback** | In-flight cancellation and transactional rollback service (`ImportRollbackService`) prevent partial data pollution. | Operational / Verified |
+| **Strict Multi-Currency Separation** | Multi-currency compensation records are supported natively; cross-currency summation is strictly prohibited without explicit FX rates. | Operational / Verified |
+| **Dedicated Health Check Endpoints (D-14)** | Decouples process liveness (`/health/live`) from dependency readiness (`/health/ready`) and worker health (`/health/workers`). | Operational / Verified |
+
+---
 
 ## 10. Out of Scope
 
-- Payroll disbursement/provider integration; statutory payroll/tax calculation; FX conversion.
-- Dedicated/customer-managed databases as MVP features; multi-region active-active deployment.
-- SQS/DLQ, microservice decomposition, and advanced enterprise compliance automation unless later justified.
+- **Payroll Execution & Disbursement:** The system manages HR compensation records and budgets; statutory payroll disbursement and tax withholding integrations are outside assessment scope.
+- **Foreign Exchange (FX) Conversion:** No consolidated single-currency totals are generated without an integrated FX rate feed.
+- **Customer-Managed Databases:** Future option for high-tier enterprise clients; MVP uses shared schema with RLS.

@@ -26,6 +26,10 @@ frontend/dist/
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
+test-results/
+playwright-report/
+frontend/test-results/
+frontend/playwright-report/
 
 # Docker
 *.override.yml

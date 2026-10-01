@@ -1,4 +1,4 @@
-export default function EmployeeTable({ employees, loading, onEditEmployee }) {
+export default function EmployeeTable({ employees, loading, onEditEmployee, onViewCompensation }) {
   if (loading) {
     return (
       <div className="table-loading" aria-live="polite">
@@ -68,6 +68,14 @@ export default function EmployeeTable({ employees, loading, onEditEmployee }) {
               <td>{getStatusBadge(emp.employment_status)}</td>
               <td className="emp-date-cell">{emp.hire_date}</td>
               <td className="emp-actions-cell">
+                <button
+                  type="button"
+                  className="btn-action-comp"
+                  onClick={() => onViewCompensation && onViewCompensation(emp)}
+                  aria-label={`View compensation for ${emp.first_name} ${emp.last_name}`}
+                >
+                  💰 Compensation
+                </button>
                 <button
                   type="button"
                   className="btn-action-edit"

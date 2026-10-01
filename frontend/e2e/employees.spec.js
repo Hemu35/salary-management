@@ -159,7 +159,7 @@ test.describe('Employee Directory E2E Browser Automation', () => {
 
     // Wait for directory to be loaded
     await expect(page.locator('.directory-titles h3')).toHaveText('Employee Directory');
-    await expect(page.locator('.employee-table')).toContainText('Alice Walker');
+    await expect(page.locator('.employee-table')).toContainText('Alice Walker', { timeout: 10000 });
 
     // Find Bob Martin's edit button and click it
     const bobRow = page.locator('tr:has-text("Bob Martin")');

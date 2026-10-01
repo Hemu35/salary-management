@@ -64,4 +64,14 @@ describe('EmployeeTable Component', () => {
 
     expect(onEditEmployee).toHaveBeenCalledWith(mockEmployees[0]);
   });
+
+  it('calls onViewCompensation when Compensation button is clicked', () => {
+    const onViewCompensation = vi.fn();
+    render(<EmployeeTable employees={mockEmployees} loading={false} onViewCompensation={onViewCompensation} />);
+
+    const compBtn = screen.getByRole('button', { name: /View compensation for Alice Walker/i });
+    compBtn.click();
+
+    expect(onViewCompensation).toHaveBeenCalledWith(mockEmployees[0]);
+  });
 });

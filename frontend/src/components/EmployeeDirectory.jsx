@@ -4,6 +4,7 @@ import { fetchEmployees } from '../api/employees';
 import EmployeeTable from './EmployeeTable';
 import CreateEmployeeModal from './CreateEmployeeModal';
 import EditEmployeeModal from './EditEmployeeModal';
+import CompensationModal from './CompensationModal';
 
 export default function EmployeeDirectory() {
   const { selectedDomainId, activeDomain, isAllDomains } = useDomain();
@@ -28,6 +29,7 @@ export default function EmployeeDirectory() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [viewingCompensationEmployee, setViewingCompensationEmployee] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
   useEffect(() => {
@@ -164,6 +166,7 @@ export default function EmployeeDirectory() {
         employees={employees}
         loading={loading}
         onEditEmployee={setEditingEmployee}
+        onViewCompensation={setViewingCompensationEmployee}
       />
 
       {meta.total_count > 0 && (
@@ -212,6 +215,13 @@ export default function EmployeeDirectory() {
         employee={editingEmployee}
         onClose={() => setEditingEmployee(null)}
         onEmployeeUpdated={handleEmployeeUpdated}
+      />
+
+      <CompensationModal
+        isOpen={!!viewingCompensationEmployee}
+        employee={viewingCompensationEmployee}
+        onClose={() => setViewingCompensationEmployee(null)}
+        onCompensationUpdated={() => setReloadTrigger((prev) => prev + 1)}
       />
     </div>
   );

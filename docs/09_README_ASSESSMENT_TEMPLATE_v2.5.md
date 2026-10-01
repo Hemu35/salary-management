@@ -275,3 +275,4 @@ Performance was formally measured against the deterministic 10,000-employee data
 - [x] **Health check endpoints** operational (`/health/live`, `/health/ready`, `/health/workers`).
 - [x] **Architecture Decision Log** updated with status and ADRs D-18 and D-19.
 - [x] **AI Usage Log** transparently recorded.
+- [x] **Assessment Demo Walkthrough Script** prepared in [`docs/08_DEMO_SCRIPT_v2.5.md`](docs/08_DEMO_SCRIPT_v2.5.md).

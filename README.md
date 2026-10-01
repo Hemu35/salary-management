@@ -181,5 +181,6 @@ npx.cmd playwright test
 | [`docs/05_DELIVERY_PLAN_v2.5.md`](docs/05_DELIVERY_PLAN_v2.5.md) | Milestone Delivery Plan |
 | [`docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md`](docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md) | Transparent AI Usage Log |
 | [`docs/07_DECISION_LOG_v2.5.md`](docs/07_DECISION_LOG_v2.5.md) | Architecture Decision Register (ADR) |
+| [`docs/08_DEMO_SCRIPT_v2.5.md`](docs/08_DEMO_SCRIPT_v2.5.md) | Assessment Demo Walkthrough Script & Guide |
 | [`docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md`](docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md) | Formal Assessment Submission Documentation |
 | [`docs/architecture_diagram.png`](docs/architecture_diagram.png) | High-Level Architecture Topology Diagram |

@@ -21,7 +21,7 @@ Rails.application.routes.draw do
     end
 
     # Async CSV export
-    resources :exports, only: [ :create, :show ] do
+    resources :exports, only: [ :index, :create, :show ] do
       member { get :download }
     end
 

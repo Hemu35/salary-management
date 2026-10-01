@@ -6,6 +6,7 @@ class Tenant < ApplicationRecord
   has_many :compensation_records, dependent: :destroy
   has_many :compensation_components, dependent: :destroy
   has_many :import_jobs, dependent: :destroy
+  has_many :export_jobs, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
   validates :status, inclusion: { in: %w[active inactive] }

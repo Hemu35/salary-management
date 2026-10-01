@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_110825) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -76,6 +76,27 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_110825) do
     t.index ["tenant_id", "employee_number"], name: "index_employees_on_tenant_id_and_employee_number", unique: true
     t.index ["tenant_id", "employment_status"], name: "index_employees_on_tenant_id_and_employment_status"
     t.index ["tenant_id"], name: "index_employees_on_tenant_id"
+  end
+
+  create_table "export_jobs", force: :cascade do |t|
+    t.bigint "tenant_id", null: false
+    t.bigint "user_id", null: false
+    t.string "status", limit: 30, default: "queued", null: false
+    t.string "filename", null: false
+    t.string "file_path"
+    t.jsonb "filters", default: {}, null: false
+    t.integer "total_rows", default: 0, null: false
+    t.integer "processed_rows", default: 0, null: false
+    t.text "error_message"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id", "created_at"], name: "index_export_jobs_on_tenant_id_and_created_at"
+    t.index ["tenant_id", "status"], name: "index_export_jobs_on_tenant_id_and_status"
+    t.index ["tenant_id"], name: "index_export_jobs_on_tenant_id"
+    t.index ["user_id"], name: "index_export_jobs_on_user_id"
   end
 
   create_table "import_jobs", force: :cascade do |t|
@@ -144,6 +165,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_110825) do
   add_foreign_key "domains", "tenants"
   add_foreign_key "employees", "domains", on_delete: :cascade
   add_foreign_key "employees", "tenants", on_delete: :cascade
+  add_foreign_key "export_jobs", "tenants", on_delete: :cascade
+  add_foreign_key "export_jobs", "users", on_delete: :cascade
   add_foreign_key "import_jobs", "tenants", on_delete: :cascade
   add_foreign_key "import_jobs", "users", on_delete: :cascade
   add_foreign_key "user_domain_assignments", "domains"

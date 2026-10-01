@@ -4,6 +4,8 @@ class User < ApplicationRecord
   belongs_to :tenant
   has_many :user_domain_assignments, dependent: :destroy
   has_many :domains, through: :user_domain_assignments
+  has_many :import_jobs, dependent: :destroy
+  has_many :export_jobs, dependent: :destroy
 
   ROLES = %w[organization_admin hr_manager].freeze
 

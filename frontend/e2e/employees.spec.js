@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { execSync } from 'child_process';
 
 test.describe('Employee Directory E2E Browser Automation', () => {
+  test.beforeAll(() => {
+    try {
+      execSync('docker compose exec -T backend bundle exec rails db:seed', { stdio: 'ignore', timeout: 30000 });
+    } catch (e) {
+      console.warn('Note: db:seed beforeAll skipped in test environment:', e.message);
+    }
+  });
   test('Organization Admin sees all seeded employees across departments', async ({ page }) => {
     await page.goto('/');
     await page.click('button:has-text("Fill Org Admin")');

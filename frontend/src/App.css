@@ -1014,10 +1014,19 @@ body {
   border-style: dashed;
 }
 
-.modal-card.modal-card-lg {
-  max-width: 860px;
+.modal-card.modal-card-lg,
+.modal-card.modal-card-broad {
+  max-width: 820px;
   max-height: 90vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-card.modal-card-broad .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.25rem;
   display: flex;
   flex-direction: column;
 }
@@ -1378,6 +1387,830 @@ body {
 
 .comp-history-card:hover {
   border-color: #cbd5e1;
+}
+
+/* Directory Action Buttons */
+.directory-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Bulk Import Modal Styling */
+.import-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.import-template-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+}
+
+.import-template-info strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 0.2rem;
+}
+
+.import-template-info p {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.btn-download-template {
+  font-size: 0.825rem;
+  padding: 0.5rem 0.9rem;
+  flex-shrink: 0;
+}
+
+/* Import Dropzone */
+.import-dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 2.25rem 1.5rem;
+  text-align: center;
+  background: #fdfdfe;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.import-dropzone:hover {
+  border-color: var(--primary);
+  background: #fafafa;
+}
+
+.import-dropzone.drag-active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.import-dropzone.has-file {
+  border-color: var(--success);
+  background: #f0fdf4;
+}
+
+.dropzone-icon {
+  font-size: 2.25rem;
+}
+
+.dropzone-prompt .prompt-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dropzone-prompt .prompt-subtitle {
+  display: block;
+  font-size: 0.825rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.dropzone-file-info .file-name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.dropzone-file-info .file-size {
+  display: block;
+  font-size: 0.825rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.dropzone-file-info .file-replace-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--primary);
+  margin-top: 0.5rem;
+}
+
+/* Requirements Box */
+.import-requirements-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  font-size: 0.825rem;
+}
+
+.import-requirements-box h5 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+
+.import-requirements-box ul {
+  padding-left: 1.2rem;
+  margin: 0;
+  color: #475569;
+}
+
+.import-requirements-box li {
+  margin-bottom: 0.35rem;
+}
+
+.import-requirements-box code {
+  background: #e2e8f0;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.775rem;
+}
+
+/* Import Progress View */
+.import-progress-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.import-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.status-file-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-file-meta .status-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.status-file-meta .status-filename {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.status-badge-queued {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge-processing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge-completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge-completed_with_errors {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge-failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge-cancelling {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.status-badge-cancelled {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.status-badge-rolled_back {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+.job-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-job-action {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.btn-job-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel-job {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
+}
+
+.btn-cancel-job:hover:not(:disabled) {
+  background: #ffe4e6;
+  border-color: #fda4af;
+}
+
+.btn-rollback-job {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  color: #7c3aed;
+}
+
+.btn-rollback-job:hover:not(:disabled) {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+}
+
+.status-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+/* Progress Bar */
+.import-progress-bar-container {
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.import-progress-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.import-progress-bar-fill.progress-queued {
+  background: #fbbf24;
+}
+
+.import-progress-bar-fill.progress-processing {
+  background: var(--primary);
+  background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  0% { background-position: 1rem 0; }
+  100% { background-position: 0 0; }
+}
+
+.import-progress-bar-fill.progress-completed {
+  background: var(--success);
+}
+
+.import-progress-bar-fill.progress-completed_with_errors {
+  background: #f59e0b;
+}
+
+.import-progress-bar-fill.progress-failed {
+  background: var(--danger);
+}
+
+.import-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.825rem;
+  color: #64748b;
+  margin-top: -1rem;
+}
+
+/* Metrics Grid */
+.import-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.import-metric-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+}
+
+.import-metric-card .metric-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.import-metric-card .metric-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.import-metric-card.metric-success .metric-value {
+  color: var(--success);
+}
+
+.import-metric-card.metric-danger .metric-value {
+  color: var(--danger);
+}
+
+/* Errors Table */
+.import-errors-section {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.import-errors-title {
+  font-size: 0.9rem;
+  color: #991b1b;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.import-errors-scroll {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #fed7d7;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+}
+
+.import-errors-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.import-errors-table th,
+.import-errors-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.import-errors-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Active Jobs Badge in Header */
+.badge-active-jobs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Tab Navigation */
+.import-tab-nav {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1.75rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.import-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.import-tab-btn:hover {
+  color: #1e293b;
+}
+
+.import-tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: #ffffff;
+}
+
+.tab-pill {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 0.1rem 0.4rem;
+  line-height: 1;
+}
+
+/* Staged Files Container */
+.staged-files-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.staged-files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  font-size: 0.825rem;
+  color: #334155;
+}
+
+.btn-text-danger {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-text-danger:hover {
+  text-decoration: underline;
+}
+
+.staged-files-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.staged-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  color: #0f172a;
+}
+
+.staged-file-pill .file-size {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.btn-remove-file {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.2rem;
+  line-height: 1;
+}
+
+.btn-remove-file:hover {
+  color: #ef4444;
+}
+
+/* Jobs List View */
+.import-jobs-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.jobs-list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jobs-list-count {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.btn-upload-more {
+  font-size: 0.825rem;
+  padding: 0.45rem 0.85rem;
+}
+
+.jobs-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.import-job-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.import-job-card:hover {
+  border-color: #cbd5e1;
+}
+
+.import-job-card.card-status-processing {
+  border-color: #93c5fd;
+  background: #fcfdfe;
+}
+
+.job-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.job-file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.job-filename {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.job-timestamp {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.job-card-progress {
+  margin-bottom: 0.65rem;
+}
+
+.job-progress-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.775rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.job-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #475569;
+}
+
+.stat-pill .label {
+  font-weight: 500;
+}
+
+.stat-pill .val {
+  font-weight: 700;
+}
+
+.stat-pill.stat-success .val {
+  color: var(--success);
+}
+
+.stat-pill.stat-danger .val {
+  color: var(--danger);
+}
+
+.btn-toggle-errors {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-errors:hover {
+  background: #fee2e2;
+}
+
+.empty-jobs-card {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #64748b;
+}
+
+.empty-jobs-card .empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Confirm Modal - Elevated Overlay on top of other modals */
+.confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.confirm-modal-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 440px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.confirm-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.confirm-icon-wrapper.danger {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.confirm-icon-wrapper.warning {
+  background: #f3e8ff;
+  border: 1px solid #e9d5ff;
+}
+
+.confirm-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.confirm-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.confirm-message {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.confirm-actions button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-confirm-danger {
+  background: #ef4444;
+  color: #ffffff;
+  border: 1px solid #dc2626;
+}
+
+.btn-confirm-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-confirm-warning {
+  background: #7c3aed;
+  color: #ffffff;
+  border: 1px solid #6d28d9;
+}
+
+.btn-confirm-warning:hover:not(:disabled) {
+  background: #6d28d9;
 }
 
 

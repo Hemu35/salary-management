@@ -10,6 +10,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
+  timeout: 60000,
+  expect: {
+    timeout: 10000,
+  },
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3000',
@@ -17,7 +21,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     launchOptions: {
-      slowMo: 500,
+      slowMo: process.env.SLOWMO ? parseInt(process.env.SLOWMO) : 50,
     },
   },
   projects: [

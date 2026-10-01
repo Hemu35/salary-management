@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDomain } from '../context/DomainContext';
 import { fetchEmployees } from '../api/employees';
+import { fetchImports } from '../api/imports';
 import EmployeeTable from './EmployeeTable';
 import CreateEmployeeModal from './CreateEmployeeModal';
 import EditEmployeeModal from './EditEmployeeModal';
 import CompensationModal from './CompensationModal';
+import ImportModal from './ImportModal';
 
 export default function EmployeeDirectory() {
   const { selectedDomainId, activeDomain, isAllDomains } = useDomain();
@@ -28,6 +30,8 @@ export default function EmployeeDirectory() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [runningImportsCount, setRunningImportsCount] = useState(0);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [viewingCompensationEmployee, setViewingCompensationEmployee] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -95,6 +99,39 @@ export default function EmployeeDirectory() {
     setReloadTrigger((prev) => prev + 1);
   };
 
+  // Periodically check for active background imports
+  useEffect(() => {
+    let ignore = false;
+    let timer = null;
+
+    async function checkBackgroundImports() {
+      try {
+        const jobs = await fetchImports();
+        if (!ignore) {
+          const activeCount = jobs.filter(j => j.status === 'queued' || j.status === 'processing' || j.status === 'cancelling').length;
+          setRunningImportsCount(prevCount => {
+            if (prevCount > 0 && activeCount === 0) {
+              setReloadTrigger(prev => prev + 1);
+            }
+            return activeCount;
+          });
+          if (activeCount > 0) {
+            timer = setTimeout(checkBackgroundImports, 2000);
+          }
+        }
+      } catch (e) {
+        // silent
+      }
+    }
+
+    checkBackgroundImports();
+
+    return () => {
+      ignore = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [reloadTrigger, isImportModalOpen]);
+
   return (
     <div className="employee-directory">
       <div className="directory-header">
@@ -105,13 +142,28 @@ export default function EmployeeDirectory() {
           </span>
         </div>
 
-        <button
-          type="button"
-          className="btn-primary btn-add-employee"
-          onClick={() => setIsModalOpen(true)}
-        >
-          + Add Employee
-        </button>
+        <div className="directory-actions">
+          <button
+            type="button"
+            className="btn-secondary btn-import-csv"
+            onClick={() => setIsImportModalOpen(true)}
+          >
+            {runningImportsCount > 0 ? (
+              <>
+                <span className="status-spinner" /> 📥 Imports ({runningImportsCount} running...)
+              </>
+            ) : (
+              '📥 Import CSV'
+            )}
+          </button>
+          <button
+            type="button"
+            className="btn-primary btn-add-employee"
+            onClick={() => setIsModalOpen(true)}
+          >
+            + Add Employee
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -222,6 +274,15 @@ export default function EmployeeDirectory() {
         employee={viewingCompensationEmployee}
         onClose={() => setViewingCompensationEmployee(null)}
         onCompensationUpdated={() => setReloadTrigger((prev) => prev + 1)}
+      />
+
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => {
+          setIsImportModalOpen(false);
+          setReloadTrigger((prev) => prev + 1);
+        }}
+        onImportCompleted={() => setReloadTrigger((prev) => prev + 1)}
       />
     </div>
   );

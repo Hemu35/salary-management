@@ -35,7 +35,7 @@ Browser → CloudFront → WAF → ALB → Rails API (ECS Fargate)
 | D-12 | CSV import and export are P0 and asynchronous |
 | D-14 | Separate liveness (`/health/live`) and readiness (`/health/ready`) checks |
 
-See [`docs/07_DECISION_LOG_v2.5.docx`](docs/07_DECISION_LOG_v2.5.docx) for full decision log.
+See [`docs/07_DECISION_LOG_v2.5.md`](docs/07_DECISION_LOG_v2.5.md) for full decision log.
 
 ---
 
@@ -86,8 +86,19 @@ docker compose exec backend bin/rails db:seed
 
 ### Run tests
 
+#### Backend (RSpec)
 ```bash
 docker compose exec backend bundle exec rspec
+```
+
+#### Frontend Unit & Component Tests (Vitest)
+```bash
+docker compose exec frontend npm run test -- --run
+```
+
+#### Frontend End-to-End Browser Automation (Playwright)
+```bash
+cd frontend && npx playwright test
 ```
 
 ---
@@ -101,7 +112,8 @@ docker compose exec backend bundle exec rspec
 | `GET /api/employees` | List employees (paginated, filtered) |
 | `POST /api/employees` | Create employee |
 | `GET/PATCH /api/employees/:id` | Show/update employee |
-| `GET/POST /api/employees/:id/compensation` | Compensation history |
+| `GET/POST /api/employees/:employee_id/compensation` | List compensation history / Create effective-dated revision |
+| `PATCH /api/employees/:employee_id/compensation/:id` | Update existing compensation package in-place |
 | `POST /api/imports` | Queue CSV import |
 | `GET /api/imports/:id` | Import job status |
 | `POST /api/exports` | Queue CSV export |
@@ -126,11 +138,13 @@ Password: password123
 
 | Document | Description |
 |----------|-------------|
-| [`docs/01_PRD_v2.5.docx`](docs/01_PRD_v2.5.docx) | Product Requirements |
-| [`docs/02_HLD_v2.5.docx`](docs/02_HLD_v2.5.docx) | High-Level Design |
-| [`docs/03_LLD_v2.5.docx`](docs/03_LLD_v2.5.docx) | Low-Level Design |
-| [`docs/Incubyte_Employee_Compensation_TAR.docx`](docs/Incubyte_Employee_Compensation_TAR.docx) | Technical Architecture Review |
-| [`docs/04_TEST_PLAN_v2.5.docx`](docs/04_TEST_PLAN_v2.5.docx) | Test Plan |
-| [`docs/05_DELIVERY_PLAN_v2.5.docx`](docs/05_DELIVERY_PLAN_v2.5.docx) | Delivery Plan |
-| [`docs/07_DECISION_LOG_v2.5.docx`](docs/07_DECISION_LOG_v2.5.docx) | Decision Log |
+| [`docs/01_PRD_v2.5.md`](docs/01_PRD_v2.5.md) | Product Requirements |
+| [`docs/02_HLD_v2.5.md`](docs/02_HLD_v2.5.md) | High-Level Design |
+| [`docs/03_LLD_v2.5.md`](docs/03_LLD_v2.5.md) | Low-Level Design |
+| [`docs/Incubyte_Employee_Compensation_TAR.md`](docs/Incubyte_Employee_Compensation_TAR.md) | Technical Architecture Review |
+| [`docs/04_TEST_PLAN_v2.5.md`](docs/04_TEST_PLAN_v2.5.md) | Test Plan |
+| [`docs/05_DELIVERY_PLAN_v2.5.md`](docs/05_DELIVERY_PLAN_v2.5.md) | Delivery Plan |
+| [`docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md`](docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md) | AI Usage Log Template |
+| [`docs/07_DECISION_LOG_v2.5.md`](docs/07_DECISION_LOG_v2.5.md) | Decision Log |
+| [`docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md`](docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md) | README Assessment Template |
 | [`docs/architecture_diagram.png`](docs/architecture_diagram.png) | Architecture Diagram |

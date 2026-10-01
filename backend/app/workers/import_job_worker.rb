@@ -8,6 +8,7 @@ class ImportJobWorker
   def perform(import_job_id)
     job = ImportJob.find_by(id: import_job_id)
     return unless job
+    return if job.cancelled?
 
     job.update!(status: "processing", started_at: Time.current)
 
@@ -25,26 +26,52 @@ class ImportJobWorker
     failed_rows = 0
     error_summary = []
 
+    created_employee_ids = []
+    updated_employees = []
+    created_compensation_ids = []
+    superseded_compensation_ids = []
+
     lines = CSV.read(job.file_path, headers: true)
     total_rows = lines.length
     job.update!(total_rows: total_rows)
 
-    Tenant.with_tenant_context(job.tenant_id) do
+    # Establish session-level tenant isolation context on the Sidekiq DB connection
+    ActiveRecord::Base.connection.execute(
+      ActiveRecord::Base.sanitize_sql(
+        [ "SELECT set_config('app.current_tenant_id', ?, false)", job.tenant_id.to_s ]
+      )
+    )
+
+    begin
       requester = job.user
       accessible_domain_ids = requester.accessible_domain_ids
+      domains_by_name = Domain.where(tenant_id: job.tenant_id).all.index_by { |d| d.name.to_s.strip.downcase }
 
       lines.each_with_index do |row, index|
+        # Check if cancellation was requested during processing
+        if (index % 5).zero?
+          job.reload
+          if job.cancelling? || job.cancelled?
+            job.update_columns(rollback_metadata: {
+              "created_employee_ids" => created_employee_ids,
+              "updated_employees" => updated_employees,
+              "created_compensation_ids" => created_compensation_ids,
+              "superseded_compensation_ids" => superseded_compensation_ids
+            })
+            ImportRollbackService.call(job)
+            return
+          end
+        end
+
         row_num = index + 2 # Header is row 1
         row_errors = []
 
-        ActiveRecord::Base.transaction(requires_new: true) do
-          domain_name = row["domain_name"] || row["department"]
-          domain = Domain.where(tenant_id: job.tenant_id)
-                         .where("LOWER(name) = ?", domain_name.to_s.strip.downcase)
-                         .first
+        ActiveRecord::Base.transaction do
+          raw_domain_name = (row["domain_name"] || row["department"]).to_s.strip
+          domain = domains_by_name[raw_domain_name.downcase]
 
           if domain.nil?
-            row_errors << "Domain '#{domain_name}' does not exist"
+            row_errors << "Domain '#{raw_domain_name}' does not exist"
           elsif requester.hr_manager? && !accessible_domain_ids.include?(domain.id)
             row_errors << "Access denied: Domain '#{domain.name}' is outside your assigned scope"
           end
@@ -54,6 +81,12 @@ class ImportJobWorker
               tenant_id: job.tenant_id,
               employee_number: row["employee_number"].to_s.strip
             )
+            is_new_emp = emp.new_record?
+            prev_emp_attributes = if is_new_emp
+                                    nil
+                                  else
+                                    emp.attributes.slice("domain_id", "first_name", "last_name", "email", "country_code", "job_title", "employment_status", "hire_date")
+                                  end
 
             emp.assign_attributes(
               domain: domain,
@@ -67,25 +100,43 @@ class ImportJobWorker
             )
 
             if emp.save
+              if is_new_emp
+                created_employee_ids << emp.id
+              else
+                updated_employees << { "id" => emp.id, "previous" => prev_emp_attributes }
+              end
+
               base_salary = row["base_salary"].presence
               if base_salary.present?
                 eff_date = row["effective_date"].presence || emp.hire_date || Date.current
                 currency = (row["currency"].presence || "USD").to_s.strip.upcase
                 pay_freq = (row["pay_frequency"].presence || "annual").to_s.strip.downcase
 
-                CompensationRecord.where(tenant_id: job.tenant_id, employee_id: emp.id, status: "active")
-                                  .update_all(status: "superseded")
-
-                rec = CompensationRecord.create!(
+                rec = CompensationRecord.find_or_initialize_by(
                   tenant_id: job.tenant_id,
                   employee_id: emp.id,
-                  effective_date: eff_date,
+                  effective_date: eff_date
+                )
+                is_new_rec = rec.new_record?
+
+                prev_active = CompensationRecord.where(tenant_id: job.tenant_id, employee_id: emp.id, status: "active")
+                                                .where.not(id: rec.id)
+                superseded_compensation_ids.concat(prev_active.pluck(:id))
+                prev_active.update_all(status: "superseded")
+
+                rec.assign_attributes(
                   currency: currency,
                   pay_frequency: pay_freq,
                   status: "active",
                   created_by_id: requester.id,
                   notes: row["notes"].presence || "Imported via CSV batch"
                 )
+                rec.save!
+                rec.compensation_components.destroy_all
+
+                if is_new_rec && !is_new_emp
+                  created_compensation_ids << rec.id
+                end
 
                 CompensationComponent.create!(
                   tenant_id: job.tenant_id,
@@ -133,6 +184,12 @@ class ImportJobWorker
           if row_errors.any?
             raise ActiveRecord::Rollback
           end
+        rescue ActiveRecord::RecordInvalid => e
+          row_errors.concat(e.record.errors.full_messages)
+          raise ActiveRecord::Rollback
+        rescue StandardError => e
+          row_errors << e.message
+          raise ActiveRecord::Rollback
         end
 
         if row_errors.any?
@@ -142,14 +199,23 @@ class ImportJobWorker
           successful_rows += 1
         end
 
-        if ((index + 1) % 20).zero?
-          job.update!(
+        # Immediately commit progress to database so UI polling displays real-time advancement
+        if ((index + 1) % 10).zero? || (index + 1) == total_rows
+          job.update_columns(
             processed_rows: index + 1,
             successful_rows: successful_rows,
-            failed_rows: failed_rows
+            failed_rows: failed_rows,
+            rollback_metadata: {
+              "created_employee_ids" => created_employee_ids,
+              "updated_employees" => updated_employees,
+              "created_compensation_ids" => created_compensation_ids,
+              "superseded_compensation_ids" => superseded_compensation_ids
+            }
           )
         end
       end
+    ensure
+      ActiveRecord::Base.connection.execute("SELECT set_config('app.current_tenant_id', '', false)") rescue nil
     end
 
     final_status = if failed_rows.zero?
@@ -166,6 +232,12 @@ class ImportJobWorker
       successful_rows: successful_rows,
       failed_rows: failed_rows,
       error_summary: error_summary,
+      rollback_metadata: {
+        "created_employee_ids" => created_employee_ids,
+        "updated_employees" => updated_employees,
+        "created_compensation_ids" => created_compensation_ids,
+        "superseded_compensation_ids" => superseded_compensation_ids
+      },
       completed_at: Time.current
     )
   end

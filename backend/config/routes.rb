@@ -13,7 +13,12 @@ Rails.application.routes.draw do
     end
 
     # Async CSV import
-    resources :imports, only: [ :create, :show ]
+    resources :imports, only: [ :index, :create, :show ] do
+      member do
+        post :cancel
+        post :rollback
+      end
+    end
 
     # Async CSV export
     resources :exports, only: [ :create, :show ] do

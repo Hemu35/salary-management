@@ -3,6 +3,8 @@ class Tenant < ApplicationRecord
   has_many :domains, dependent: :destroy
   has_many :user_domain_assignments, dependent: :destroy
   has_many :employees, dependent: :destroy
+  has_many :compensation_records, dependent: :destroy
+  has_many :compensation_components, dependent: :destroy
   has_many :import_jobs, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
@@ -19,5 +21,9 @@ class Tenant < ApplicationRecord
       )
       block.call
     end
+  end
+
+  def with_tenant_context(&block)
+    self.class.with_tenant_context(id, &block)
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_01_064758) do
+ActiveRecord::Schema[7.2].define(version: 2026_10_01_110825) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -93,6 +93,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_01_064758) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "rollback_metadata", default: {}, null: false
     t.index ["tenant_id", "created_at"], name: "index_import_jobs_on_tenant_id_and_created_at"
     t.index ["tenant_id", "status"], name: "index_import_jobs_on_tenant_id_and_status"
     t.index ["tenant_id"], name: "index_import_jobs_on_tenant_id"

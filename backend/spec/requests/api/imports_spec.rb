@@ -105,4 +105,53 @@ RSpec.describe "Api::Imports", type: :request do
       end
     end
   end
+
+  describe "POST /api/imports/:id/cancel" do
+    let!(:queued_job) { create(:import_job, tenant: tenant, user: user, status: "queued") }
+    let!(:other_job) { create(:import_job, tenant: other_tenant, user: other_user, status: "queued") }
+
+    context "when authenticated" do
+      before { login_as(user) }
+
+      it "cancels a queued job immediately" do
+        post "/api/imports/#{queued_job.id}/cancel"
+        expect(response).to have_http_status(:ok)
+        expect(queued_job.reload.status).to eq("cancelled")
+      end
+
+      it "returns 404 for a job belonging to another tenant" do
+        post "/api/imports/#{other_job.id}/cancel"
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "POST /api/imports/:id/rollback" do
+    let!(:emp) { create(:employee, tenant: tenant, domain: domain, employee_number: "ROLLBACK_TEST") }
+    let!(:completed_job) do
+      create(:import_job,
+        tenant: tenant,
+        user: user,
+        status: "completed",
+        rollback_metadata: { "created_employee_ids" => [ emp.id ] }
+      )
+    end
+
+    context "when authenticated" do
+      before { login_as(user) }
+
+      it "rolls back a completed job and reverts created records" do
+        post "/api/imports/#{completed_job.id}/rollback"
+        expect(response).to have_http_status(:ok)
+        expect(completed_job.reload.status).to eq("rolled_back")
+        expect(tenant.employees.find_by(id: emp.id)).to be_nil
+      end
+
+      it "returns 422 if job cannot be rolled back" do
+        empty_job = create(:import_job, tenant: tenant, user: user, status: "queued")
+        post "/api/imports/#{empty_job.id}/rollback"
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
+  end
 end

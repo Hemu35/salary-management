@@ -2,7 +2,7 @@ class ImportJob < ApplicationRecord
   belongs_to :tenant
   belongs_to :user
 
-  STATUSES = %w[queued processing completed completed_with_errors failed].freeze
+  STATUSES = %w[queued processing cancelling cancelled completed completed_with_errors failed rolled_back].freeze
 
   validates :status, inclusion: { in: STATUSES }
   validates :filename, :file_path, presence: true
@@ -10,7 +10,7 @@ class ImportJob < ApplicationRecord
   scope :recent_first, -> { order(created_at: :desc) }
 
   def progress_percentage
-    return 100 if completed? || completed_with_errors? || failed?
+    return 100 if completed? || completed_with_errors? || failed? || rolled_back?
     return 0 if total_rows.nil? || total_rows.zero?
 
     ((processed_rows.to_f / total_rows) * 100).round
@@ -34,5 +34,31 @@ class ImportJob < ApplicationRecord
 
   def queued?
     status == "queued"
+  end
+
+  def cancelling?
+    status == "cancelling"
+  end
+
+  def cancelled?
+    status == "cancelled"
+  end
+
+  def rolled_back?
+    status == "rolled_back"
+  end
+
+  def can_cancel?
+    queued? || processing?
+  end
+
+  def can_rollback?
+    (completed? || completed_with_errors? || failed?) && (
+      (rollback_metadata.is_a?(Hash) && (
+        (rollback_metadata["created_employee_ids"] || []).any? ||
+        (rollback_metadata["created_compensation_ids"] || []).any? ||
+        (rollback_metadata["updated_employees"] || []).any?
+      ))
+    )
   end
 end

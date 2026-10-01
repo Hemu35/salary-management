@@ -125,6 +125,10 @@ comp_packages = {
   }
 }
 
+# Reset demo compensation records and components
+CompensationComponent.where(tenant: tenant).delete_all
+CompensationRecord.where(tenant: tenant).delete_all
+
 comp_packages.each do |emp_num, comp_info|
   emp = Employee.find_by!(tenant: tenant, employee_number: emp_num)
   rec = CompensationRecord.find_or_initialize_by(tenant: tenant, employee: emp, effective_date: comp_info[:effective_date])

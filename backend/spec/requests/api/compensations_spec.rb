@@ -218,4 +218,101 @@ RSpec.describe "Api::Compensations", type: :request do
       end
     end
   end
+
+  describe "PATCH /api/employees/:employee_id/compensation/:id" do
+    let!(:existing_record) do
+      rec = create(:compensation_record,
+        tenant: tenant,
+        employee: employee_eng,
+        effective_date: Date.current - 1.month,
+        currency: "USD",
+        pay_frequency: "annual",
+        status: "active",
+        notes: "Original package"
+      )
+      create(:compensation_component,
+        tenant: tenant,
+        compensation_record: rec,
+        component_type: "base_salary",
+        amount: BigDecimal("150000.00"),
+        frequency: "annual"
+      )
+      rec
+    end
+
+    context "when unauthenticated" do
+      it "returns 401 Unauthorized" do
+        patch "/api/employees/#{employee_eng.id}/compensation/#{existing_record.id}", params: { compensation: { notes: "Updated" } }
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when employee belongs to another tenant" do
+      before { login_as(admin) }
+
+      it "returns 404 Not Found" do
+        patch "/api/employees/#{other_employee.id}/compensation/#{existing_record.id}", params: { compensation: { notes: "Updated" } }
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when HR manager accesses employee in unauthorized domain" do
+      before { login_as(hr_eng) }
+
+      it "returns 403 Forbidden" do
+        patch "/api/employees/#{employee_sales.id}/compensation/#{existing_record.id}", params: { compensation: { notes: "Updated" } }
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when authorized" do
+      before { login_as(hr_eng) }
+
+      it "updates existing compensation record and modifies components in-place" do
+        update_params = {
+          compensation: {
+            notes: "Updated package with annual allowance",
+            components: [
+              { component_type: "base_salary", amount: 150000.00, frequency: "annual" },
+              { component_type: "allowance", amount: 12000.00, frequency: "annual" }
+            ]
+          }
+        }
+
+        expect {
+          patch "/api/employees/#{employee_eng.id}/compensation/#{existing_record.id}", params: update_params
+        }.not_to change(CompensationRecord, :count)
+
+        expect(response).to have_http_status(:ok)
+        body = JSON.parse(response.body)
+
+        expect(body["id"]).to eq(existing_record.id)
+        expect(body["notes"]).to eq("Updated package with annual allowance")
+        expect(body["base_salary_amount"]).to eq("150000.0")
+        expect(body["total_annualized_compensation"]).to eq("162000.0")
+        expect(body["components"].length).to eq(2)
+
+        component_types = body["components"].map { |c| c["component_type"] }
+        expect(component_types).to contain_exactly("base_salary", "allowance")
+      end
+
+      it "returns 422 Unprocessable Content when parameters are invalid" do
+        invalid_params = {
+          compensation: {
+            currency: "NOT_A_CURRENCY"
+          }
+        }
+
+        patch "/api/employees/#{employee_eng.id}/compensation/#{existing_record.id}", params: invalid_params
+        expect(response).to have_http_status(:unprocessable_content)
+        body = JSON.parse(response.body)
+        expect(body["errors"]).to be_present
+      end
+
+      it "returns 404 Not Found when compensation record does not exist" do
+        patch "/api/employees/#{employee_eng.id}/compensation/999999", params: { compensation: { notes: "Updated" } }
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
 end

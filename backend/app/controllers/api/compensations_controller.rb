@@ -62,6 +62,53 @@ module Api
       end
     end
 
+    # PATCH/PUT /api/employees/:employee_id/compensation/:id
+    def update
+      with_tenant_context do
+        record = @employee.compensation_records.find_by(id: params[:id])
+        return render_not_found unless record
+
+        components_params = params.dig(:compensation, :components)
+        clean_params = compensation_params.except(:components)
+
+        success = false
+
+        ActiveRecord::Base.transaction do
+          # If transitioning status to active, supersede all other active records for this employee
+          if clean_params[:status] == "active" && record.status != "active"
+            @employee.compensation_records.where(status: "active").where.not(id: record.id).update_all(status: "superseded")
+          end
+
+          record.assign_attributes(clean_params)
+
+          if components_params.present?
+            record.compensation_components.destroy_all
+            components_params.each do |c_param|
+              record.compensation_components.build(
+                tenant: current_tenant,
+                component_type: c_param[:component_type],
+                amount: c_param[:amount],
+                percentage: c_param[:percentage],
+                frequency: c_param[:frequency] || "annual"
+              )
+            end
+          end
+
+          if record.save
+            success = true
+          else
+            raise ActiveRecord::Rollback
+          end
+        end
+
+        if success
+          render json: serialize_compensation(record.reload), status: :ok
+        else
+          render json: { errors: record.errors.full_messages }, status: :unprocessable_content
+        end
+      end
+    end
+
     private
 
     def set_employee

@@ -9,7 +9,7 @@ Rails.application.routes.draw do
 
     # Employee management (tenant + domain scoped)
     resources :employees, only: [ :index, :create, :show, :update ] do
-      resources :compensation, only: [ :index, :create ], controller: "compensations"
+      resources :compensation, only: [ :index, :create, :update ], controller: "compensations"
     end
 
     # Async CSV import

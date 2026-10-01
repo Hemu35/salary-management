@@ -1,8 +1,8 @@
-﻿# **Product Requirements Document (PRD)**
+# **Product Requirements Document (PRD)**
 
 **Global Employee Compensation Management System**
 
-*Incubyte Software Craftsperson / Ruby on Rails – Staff • Version 2.5*
+*Incubyte Software Craftsperson / Ruby on Rails – Staff*
 
 ## 1. Executive Summary
 

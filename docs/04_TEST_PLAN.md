@@ -2,11 +2,11 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Version 2.5*
+*Incubyte Assessment*
 
 ## 1. Purpose
 
-Verify the P0 product workflows and the security/operational controls in the v2.5 PRD, HLD, and LLD. Test data is synthetic and deterministic. Tests should be fast, repeatable, and understandable.
+Verify the P0 product workflows and the security/operational controls in the PRD, HLD, and LLD. Test data is synthetic and deterministic. Tests should be fast, repeatable, and understandable.
 
 ## 2. Test Strategy
 

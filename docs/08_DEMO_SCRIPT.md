@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Staff Rails Assessment • Version 2.5 • Official Demo Recording Guide*
+*Incubyte Staff Rails Assessment • Official Demo Recording Guide*
 
 ---
 
@@ -282,5 +282,5 @@ The login screen features **One-Click Quick Login** buttons. If typing manually:
 ## 4. Post-Recording Checklist
 
 - [ ] Video uploaded to YouTube (Unlisted), Loom, or Google Drive with public viewing access.
-- [ ] Video link added to [`docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md`](file:///C:/Users/himan/.gemini/antigravity/scratch/salary-management/docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md) and [`README.md`](file:///C:/Users/himan/.gemini/antigravity/scratch/salary-management/README.md).
+- [ ] Video link added to [`docs/09_ASSESSMENT_README.md`](09_ASSESSMENT_README.md) and [`README.md`](../README.md).
 - [ ] Repository pushed to GitHub with clean main branch and green CI actions.

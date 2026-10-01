@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Version 2.5 • Milestone Tracking & Status*
+*Incubyte Assessment • Milestone Tracking & Status*
 
 ---
 
@@ -25,14 +25,14 @@
 | **M3 — High-Speed Bulk Workflows** | Private storage, async CSV import/export, Sidekiq 7/Redis 7, job polling, 100x bulk batch optimization | Import/export are asynchronous, scoped, observable, and benchmarked (10k in 7.47s import, 2.82s export). | **Completed** |
 | **M4 — Insights & 10k Benchmark Seed** | Country/domain headcount, currency-grouped compensation reports, deterministic 10,000 synthetic seed | Reports correctly scope data without cross-currency mixing; seed completes in 6.12s. | **Completed** |
 | **M5 — Quality, Health & E2E Isolation** | Health endpoints (`/health/live`, `/health/ready`, `/health/workers`), worker inspection, E2E test isolation | All 323 automated tests pass (230 RSpec, 62 Vitest, 31 Playwright E2E). | **Completed** |
-| **M6 — Deployment, Documentation & Wrap-Up** | Architecture decision updates, assessment README, AI usage log, final verification | Documentation and submission checklist complete and verified against code. | **In Progress** |
+| **M6 — Deployment, Documentation & Wrap-Up** | Architecture decision updates, assessment README, AI usage log, prompt catalog, final verification | Documentation and submission checklist complete and verified against code. | **Completed** |
 
 ---
 
 ## 3. Commit Sequence Followed
 
 1. `chore: bootstrap Rails API and React app in Docker Compose`
-2. `docs: add product requirements, HLD, LLD, and architecture decisions (v2.5)`
+2. `docs: add product requirements, HLD, LLD, and architecture decisions`
 3. `feat: add authentication, tenant context, and PostgreSQL RLS defense in depth`
 4. `feat: add domain-scoped HR authorization and Pundit policies`
 5. `feat: add employee directory CRUD, multi-filter search, and server-side pagination`
@@ -48,11 +48,11 @@
 
 ## 4. Submission Checklist
 
-- [x] **One-page requirements and architecture artifacts included** (`docs/01_PRD_v2.5.md`, `docs/02_HLD_v2.5.md`, `docs/03_LLD_v2.5.md`, `docs/Incubyte_Employee_Compensation_TAR.md`).
-- [x] **Git repository contains incremental commits and readable setup instructions** (`README.md`, `docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md`).
+- [x] **One-page requirements and architecture artifacts included** ([`docs/01_PRD.md`](docs/01_PRD.md), [`docs/02_HLD.md`](docs/02_HLD.md), [`docs/03_LLD.md`](docs/03_LLD.md), [`docs/Incubyte_Employee_Compensation_TAR.md`](docs/Incubyte_Employee_Compensation_TAR.md)).
+- [x] **Git repository contains incremental commits and readable setup instructions** ([`README.md`](../README.md), [`docs/09_ASSESSMENT_README.md`](docs/09_ASSESSMENT_README.md)).
 - [x] **Deterministic 10,000 synthetic employee seed works** (`rake db:seed:benchmark` populates Globex Corporation in 6.12s with `srand(42)`).
 - [x] **Critical automated tests pass and commands are documented** (323/323: 230 RSpec, 62 Vitest, 31 Playwright E2E).
 - [x] **Performance benchmarks measured and documented** (Directory search < 40ms, 10k import 7.47s, 10k export 2.82s).
 - [x] **Architecture diagram, trade-offs, and performance considerations documented**.
-- [x] **AI prompts, assistance, and verification notes recorded** (`docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md`).
+- [x] **AI prompts, assistance, and verification notes recorded** ([`docs/06_AI_USAGE_LOG.md`](docs/06_AI_USAGE_LOG.md), [`docs/AI_PROMPTS_AND_INSTRUCTIONS.md`](docs/AI_PROMPTS_AND_INSTRUCTIONS.md)).
 - [x] **Health and operational monitoring verified** (`/health/live`, `/health/ready`, `/health/workers`).

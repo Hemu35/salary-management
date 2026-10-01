@@ -2,10 +2,12 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Version 2.5 • AI Collaboration Record*
+*Incubyte Assessment • AI Collaboration Record*
 
 ## Purpose
 This document records transparent AI assistance throughout the development of the Global Employee Compensation Management System, in accordance with the Incubyte assessment guidelines. Every AI-assisted code suggestion, architecture proposal, and test structure was independently reviewed, validated against specifications, and subjected to automated testing before acceptance.
+
+> **See Also:** For the complete verbatim prompt catalog, engineering instructions, and human steering matrix, refer to [`docs/AI_PROMPTS_AND_INSTRUCTIONS.md`](AI_PROMPTS_AND_INSTRUCTIONS.md).
 
 ---
 
@@ -16,7 +18,7 @@ This document records transparent AI assistance throughout the development of th
 | --- | --- |
 | **Date / Milestone** | 2026-09-30 • Milestone 0 |
 | **Tool / Model** | Antigravity AI Assistant (Gemini 2.5 Pro) |
-| **Task / File / Area** | Requirements synthesis, ADR registration, HLD/LLD definitions (`docs/01_PRD_v2.5.md`, `docs/02_HLD_v2.5.md`, `docs/03_LLD_v2.5.md`, `docs/07_DECISION_LOG_v2.5.md`) |
+| **Task / File / Area** | Requirements synthesis, ADR registration, HLD/LLD definitions ([`docs/01_PRD.md`](01_PRD.md), [`docs/02_HLD.md`](02_HLD.md), [`docs/03_LLD.md`](03_LLD.md), [`docs/07_DECISION_LOG.md`](07_DECISION_LOG.md)) |
 | **Prompt Summary** | Analyze Incubyte assessment requirements for multi-tenant employee compensation system. Define architecture boundaries, strict non-requirements (no statutory payroll or FX math), and ADRs. |
 | **Output Used** | Structured decision log (D-01 to D-17), layered architecture diagram specifications, and non-functional requirements. |
 | **Output Rejected / Modified** | Rejected suggestion to include dynamic FX currency conversion service or SQS/DLQ queues to avoid unnecessary complexity and keep scope strictly aligned with P0. |
@@ -43,19 +45,20 @@ This document records transparent AI assistance throughout the development of th
 
 ---
 
-### Entry 3: Core Employee & Effective-Dated Compensation Records (Milestone 2)
+### Entry 3: Core Employee & Compensation UI/UX Refinement (Milestone 2)
 | Field | Record |
 | --- | --- |
 | **Date / Milestone** | 2026-09-30 • Milestone 2 |
 | **Tool / Model** | Antigravity AI Assistant (Gemini 2.5 Pro) |
-| **Task / File / Area** | Employee CRUD, domain filtering, compensation records with historical timeline (`backend/app/models/compensation_record.rb`, `frontend/src/components/EmployeeTable.jsx`) |
-| **Prompt Summary** | Create effective-dated compensation records with nested components. Ensure old records are preserved and cannot overlap in effective dates. Build React directory with pagination and debounce search. |
-| **Output Used** | Model validations for dates, currency matching across components, and frontend modal for creating compensation revisions. |
-| **Output Rejected / Modified** | Fixed an initial edge case where updating compensation modified existing historical records in-place; corrected to create a new effective-dated record and close out the previous record's `effective_end_date`. |
-| **Human Review Performed** | Checked that all money calculations utilize `BigDecimal` / SQL `NUMERIC(15,2)` rather than floating-point math to prevent rounding errors. |
+| **Task / File / Area** | Employee CRUD, domain filtering, compensation records, UI layout, and modal design (`backend/app/models/compensation_record.rb`, `frontend/src/components/CompensationModal.jsx`, `frontend/src/components/EmployeeTable.jsx`) |
+| **Prompt Summary** | 1. Backend: Effective-dated compensation records with components, non-overlapping dates, and `BigDecimal` money types.<br>2. Frontend: Multiple human interaction cycles on UI design: overhaul cramped layout to Tailwind full-width fluid layout; separate "Add Revision" from "Edit In-Place" (`PATCH /api/employees/:id/compensation/:cid`); pre-populate existing active components in form; build visual audit timeline with Active/Historical badges. |
+| **Output Used** | Effective-dated model validations, Pundit domain scoping, Tailwind CSS styling, dynamic component row adder with live total calculation, and chronological compensation timeline. |
+| **Output Rejected / Modified** | 1. Rejected initial cramped, unstyled HTML layout and oversized modals; redesigned with fluid widths and backdrop blur.<br>2. Rejected forcing new historical revisions for minor typo fixes; decoupled into in-place edit vs. formal revision.<br>3. Rejected blank modal forms that lost existing components on edit; mandated component pre-population.<br>4. Replaced native browser `window.confirm` with custom `ConfirmationModal`. |
+| **Human Review Performed** | Verified monetary precision (`DECIMAL(15,2)`), tested edge cases where active components were accidentally dropped during editing, and validated responsive modal behavior across screen sizes. |
 | **Tests / Validation Run** | 68 backend specs + 22 frontend Vitest component tests passing. |
 | **Security / Privacy Review** | Confirmed domain-scoped authorization: HR Managers receive 403 Forbidden if attempting to read or modify employees in domains they are not assigned to. |
-| **Follow-up / Limitations** | None. |
+| **Follow-up / Limitations** | In-place edit endpoint tested and covered in `spec/requests/compensation_records_spec.rb`. |
+
 
 ---
 
@@ -111,4 +114,4 @@ This document records transparent AI assistance throughout the development of th
 - [x] **No Secrets or PII in Prompts:** All prompts referenced generic architectural patterns and synthetic schemas.
 - [x] **Independent Code & Security Review:** All AI suggestions inspected for tenant boundary leakage, SQL injection safety, and transaction boundaries.
 - [x] **100% Test Validation:** Every generated or refactored component backed by automated RSpec, Vitest, or Playwright tests.
-- [x] **Transparent Decision Tracking:** Key decisions and trade-offs recorded in `docs/07_DECISION_LOG_v2.5.md`.
+- [x] **Transparent Decision Tracking:** Key decisions and trade-offs recorded in [`docs/07_DECISION_LOG.md`](07_DECISION_LOG.md).

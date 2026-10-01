@@ -2,7 +2,7 @@
 
 **Global Employee Compensation Management System**
 
-*Incubyte Assessment • Version 2.5 • Completed Implementation*
+*Incubyte Assessment • Completed Implementation*
 
 ---
 
@@ -273,6 +273,6 @@ Performance was formally measured against the deterministic 10,000-employee data
 - [x] **Deterministic 10,000 synthetic employee seed** (`rake db:seed:benchmark`) verified.
 - [x] **All automated tests passing** (323/323: RSpec, Vitest, Playwright).
 - [x] **Health check endpoints** operational (`/health/live`, `/health/ready`, `/health/workers`).
-- [x] **Architecture Decision Log** updated with status and ADRs D-18 and D-19.
-- [x] **AI Usage Log** transparently recorded.
-- [x] **Assessment Demo Walkthrough Script** prepared in [`docs/08_DEMO_SCRIPT_v2.5.md`](docs/08_DEMO_SCRIPT_v2.5.md).
+- [x] **Architecture Decision Log** updated with status and ADRs D-18 and D-19 ([`docs/07_DECISION_LOG.md`](07_DECISION_LOG.md)).
+- [x] **AI Usage Log & Prompt Catalog** transparently recorded in [`docs/06_AI_USAGE_LOG.md`](06_AI_USAGE_LOG.md) and [`docs/AI_PROMPTS_AND_INSTRUCTIONS.md`](AI_PROMPTS_AND_INSTRUCTIONS.md).
+- [x] **Assessment Demo Walkthrough Script** prepared in [`docs/08_DEMO_SCRIPT.md`](08_DEMO_SCRIPT.md).

@@ -2,7 +2,7 @@
 
 A multi-tenant SaaS application for employee and compensation management across organizations, countries, and currencies.
 
-**Incubyte Staff Rails Assessment — v2.5**
+**Incubyte Staff Rails Assessment**
 
 ---
 
@@ -20,7 +20,7 @@ Browser → CloudFront → WAF → ALB → Rails API (ECS Fargate)
 
 **Stack:** Ruby 3.3.0 · Rails 7.2.4 (API mode) · React 19 · Vite 8 · PostgreSQL 16 · Sidekiq 7.3 · Redis 7 · AWS S3
 
-**Key Architecture Decisions (Decision Log v2.5):**
+**Key Architecture Decisions (Decision Log):**
 
 | ID | Decision | Status |
 |----|----------|--------|
@@ -37,7 +37,7 @@ Browser → CloudFront → WAF → ALB → Rails API (ECS Fargate)
 | D-18 | Bounded batch bulk processing (`BATCH_SIZE = 500`) with PostgreSQL `insert_all` | Operational (10k import in 7.47s) |
 | D-19 | Deterministic 10,000 synthetic employee seed via `BenchmarkSeedService` (`srand(42)`) | Operational |
 
-See [`docs/07_DECISION_LOG_v2.5.md`](docs/07_DECISION_LOG_v2.5.md) for full decision log.
+See [`docs/07_DECISION_LOG.md`](docs/07_DECISION_LOG.md) for full decision log.
 
 ---
 
@@ -173,14 +173,16 @@ npx.cmd playwright test
 
 | Document | Description |
 |----------|-------------|
-| [`docs/01_PRD_v2.5.md`](docs/01_PRD_v2.5.md) | Product Requirements Document |
-| [`docs/02_HLD_v2.5.md`](docs/02_HLD_v2.5.md) | High-Level Architecture Design |
-| [`docs/03_LLD_v2.5.md`](docs/03_LLD_v2.5.md) | Low-Level Technical Design |
+| [`docs/00_AI_PROMPTS_AND_DESIGN_PACK.md`](docs/00_AI_PROMPTS_AND_DESIGN_PACK.md) | Official Incubyte AI Prompts & Documentation Design Pack |
+| [`docs/01_PRD.md`](docs/01_PRD.md) | Product Requirements Document |
+| [`docs/02_HLD.md`](docs/02_HLD.md) | High-Level Architecture Design |
+| [`docs/03_LLD.md`](docs/03_LLD.md) | Low-Level Technical Design |
 | [`docs/Incubyte_Employee_Compensation_TAR.md`](docs/Incubyte_Employee_Compensation_TAR.md) | Technical Architecture Review |
-| [`docs/04_TEST_PLAN_v2.5.md`](docs/04_TEST_PLAN_v2.5.md) | Test Plan & Verification Matrix |
-| [`docs/05_DELIVERY_PLAN_v2.5.md`](docs/05_DELIVERY_PLAN_v2.5.md) | Milestone Delivery Plan |
-| [`docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md`](docs/06_AI_USAGE_LOG_TEMPLATE_v2.5.md) | Transparent AI Usage Log |
-| [`docs/07_DECISION_LOG_v2.5.md`](docs/07_DECISION_LOG_v2.5.md) | Architecture Decision Register (ADR) |
-| [`docs/08_DEMO_SCRIPT_v2.5.md`](docs/08_DEMO_SCRIPT_v2.5.md) | Assessment Demo Walkthrough Script & Guide |
-| [`docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md`](docs/09_README_ASSESSMENT_TEMPLATE_v2.5.md) | Formal Assessment Submission Documentation |
+| [`docs/04_TEST_PLAN.md`](docs/04_TEST_PLAN.md) | Test Plan & Verification Matrix |
+| [`docs/05_DELIVERY_PLAN.md`](docs/05_DELIVERY_PLAN.md) | Milestone Delivery Plan |
+| [`docs/06_AI_USAGE_LOG.md`](docs/06_AI_USAGE_LOG.md) | Transparent AI Usage Log |
+| [`docs/AI_PROMPTS_AND_INSTRUCTIONS.md`](docs/AI_PROMPTS_AND_INSTRUCTIONS.md) | AI Prompts, Instructions & Engineering Methodology |
+| [`docs/07_DECISION_LOG.md`](docs/07_DECISION_LOG.md) | Architecture Decision Register (ADR) |
+| [`docs/08_DEMO_SCRIPT.md`](docs/08_DEMO_SCRIPT.md) | Assessment Demo Walkthrough Script & Guide |
+| [`docs/09_ASSESSMENT_README.md`](docs/09_ASSESSMENT_README.md) | Formal Assessment Submission Documentation |
 | [`docs/architecture_diagram.png`](docs/architecture_diagram.png) | High-Level Architecture Topology Diagram |

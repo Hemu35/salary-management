@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 test.describe('Employee Directory E2E Browser Automation', () => {
   test.beforeAll(() => {
     try {
-      execSync('docker compose exec -T db psql -U postgres -d compensation_dev -c "DELETE FROM employees WHERE id > 4;"', { stdio: 'ignore' });
+      execSync('docker compose exec -T db psql -U postgres -d compensation_dev -c "DELETE FROM employees WHERE tenant_id IN (SELECT id FROM tenants WHERE name = \'Acme Corporation\') AND employee_number NOT IN (\'EMP0001\', \'EMP0002\', \'EMP0003\', \'EMP0004\');"', { stdio: 'ignore' });
       execSync('docker compose exec -T backend bundle exec rails db:seed', { stdio: 'ignore', timeout: 30000 });
     } catch (e) {
       console.warn('Note: db:seed beforeAll skipped in test environment:', e.message);

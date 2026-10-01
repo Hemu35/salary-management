@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 test.describe('Workforce & Compensation Insights E2E Browser Automation', () => {
   test.beforeAll(() => {
     try {
-      execSync('docker compose exec -T db psql -U postgres -d compensation_dev -c "DELETE FROM employees WHERE id > 4;"', { stdio: 'ignore' });
+      execSync('docker compose exec -T db psql -U postgres -d compensation_dev -c "DELETE FROM employees WHERE tenant_id IN (SELECT id FROM tenants WHERE name = \'Acme Corporation\') AND employee_number NOT IN (\'EMP0001\', \'EMP0002\', \'EMP0003\', \'EMP0004\');"', { stdio: 'ignore' });
       execSync('docker compose exec -T backend bundle exec rails db:seed', { stdio: 'ignore', timeout: 30000 });
     } catch (e) {
       console.warn('Note: db:seed beforeAll skipped in test environment:', e.message);
@@ -107,5 +107,43 @@ test.describe('Workforce & Compensation Insights E2E Browser Automation', () => 
     await expect(page.locator('[data-testid="kpi-headcount"] .kpi-number')).toHaveText('2');
     await expect(page.locator('[data-testid="card-by-domain"]')).toContainText('Engineering');
     await expect(page.locator('[data-testid="card-by-domain"]')).not.toContainText('Sales & Marketing');
+  });
+
+  test('Benchmark Org Admin logs in and inspects 10,000 synthetic employee analytics dataset', async ({ page }) => {
+    await page.goto('/');
+
+    // Fill Benchmark Admin
+    await page.click('button:has-text("Fill Benchmark Admin")');
+    await page.click('button[type="submit"]');
+
+    // Wait for main dashboard
+    await expect(page.locator('.welcome-header h2')).toContainText('admin@globex.com');
+    await expect(page.locator('.welcome-header')).toContainText('Globex Corporation');
+
+    // Directory shows 10,000 employees total in pagination
+    await expect(page.locator('.pagination-info')).toContainText('10000 employees');
+
+    // Switch to Insights & Analytics
+    await page.click('button[role="tab"]:has-text("Insights & Analytics")');
+    await expect(page.locator('.reports-dashboard')).toBeVisible();
+
+    // Verify 10,000 headcount in analytics
+    await expect(page.locator('[data-testid="kpi-headcount"] .kpi-number')).toHaveText('10000');
+
+    // Verify multiple countries represented
+    const countryCard = page.locator('[data-testid="card-by-country"]');
+    await expect(countryCard).toContainText('United States');
+    await expect(countryCard).toContainText('United Kingdom');
+    await expect(countryCard).toContainText('Germany');
+    await expect(countryCard).toContainText('India');
+
+    // Verify multiple domains represented
+    const domainCard = page.locator('[data-testid="card-by-domain"]');
+    await expect(domainCard).toContainText('Engineering');
+    await expect(domainCard).toContainText('Product Management');
+    await expect(domainCard).toContainText('Operations & IT');
+
+    // Verify currency isolation
+    await expect(page.locator('.currency-safety-tag')).toHaveText('🛡️ Currency Isolated');
   });
 });

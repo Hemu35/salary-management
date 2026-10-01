@@ -100,6 +100,13 @@ export default function LoginForm() {
             >
               Fill Org Admin (admin@example.com)
             </button>
+            <button
+              type="button"
+              className="btn-demo"
+              onClick={() => handleFillDemo('admin@globex.com', 'password123')}
+            >
+              Fill Benchmark Admin (admin@globex.com - 10k dataset)
+            </button>
           </div>
         </div>
       </div>

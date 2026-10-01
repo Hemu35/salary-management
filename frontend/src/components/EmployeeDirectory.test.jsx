@@ -81,4 +81,79 @@ describe('EmployeeDirectory Component', () => {
 
     expect(screen.queryByRole('heading', { name: /Add New Employee/i })).not.toBeInTheDocument();
   });
+
+  it('triggers export when Export CSV button is clicked', async () => {
+    const ExportsApiModule = await import('../api/exports');
+    const createExportSpy = vi.spyOn(ExportsApiModule, 'createExport').mockResolvedValue({
+      id: 99,
+      filename: 'employees_export_test.csv',
+      status: 'queued',
+      progress_percentage: 0,
+      total_rows: 1,
+    });
+
+    render(<EmployeeDirectory />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Alice Walker')).toBeInTheDocument();
+    });
+
+    const exportBtn = screen.getByRole('button', { name: /📤 Export CSV/i });
+    fireEvent.click(exportBtn);
+
+    await waitFor(() => {
+      expect(createExportSpy).toHaveBeenCalledWith({
+        domain_id: 'all',
+        employment_status: 'all',
+        search: '',
+      });
+      expect(screen.getByText(/Generating Export/i)).toBeInTheDocument();
+    });
+  });
+
+  it('selects employees and triggers export selected', async () => {
+    const ExportsApiModule = await import('../api/exports');
+    const createExportSpy = vi.spyOn(ExportsApiModule, 'createExport').mockResolvedValue({
+      id: 100,
+      filename: 'employees_export_selected_1_test.csv',
+      status: 'queued',
+      progress_percentage: 0,
+      total_rows: 1,
+    });
+
+    render(<EmployeeDirectory />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Alice Walker')).toBeInTheDocument();
+    });
+
+    // Initially selection action bar is not rendered
+    expect(screen.queryByRole('region', { name: /Selection actions/i })).not.toBeInTheDocument();
+
+    // Select Alice
+    const checkbox = screen.getByRole('checkbox', { name: /Select employee Alice Walker/i });
+    fireEvent.click(checkbox);
+
+    // Selection action bar appears
+    const selectionBar = screen.getByRole('region', { name: /Selection actions/i });
+    expect(selectionBar).toBeInTheDocument();
+    expect(selectionBar).toHaveTextContent(/1 employee selected/i);
+
+    // Click Export Selected
+    const exportSelectedBtn = screen.getByRole('button', { name: /Export Selected \(1\)/i });
+    fireEvent.click(exportSelectedBtn);
+
+    await waitFor(() => {
+      expect(createExportSpy).toHaveBeenCalledWith({
+        employee_ids: [1],
+      });
+      expect(screen.getByText(/Generating Export/i)).toBeInTheDocument();
+    });
+
+    // Click Clear selection
+    const clearBtn = screen.getByRole('button', { name: /Clear selection/i });
+    fireEvent.click(clearBtn);
+
+    expect(screen.queryByRole('region', { name: /Selection actions/i })).not.toBeInTheDocument();
+  });
 });

@@ -74,4 +74,37 @@ describe('EmployeeTable Component', () => {
 
     expect(onViewCompensation).toHaveBeenCalledWith(mockEmployees[0]);
   });
+
+  it('handles row selection and select all checkboxes', () => {
+    const onToggleSelectEmployee = vi.fn();
+    const onToggleSelectAll = vi.fn();
+
+    render(
+      <EmployeeTable
+        employees={mockEmployees}
+        loading={false}
+        selectedEmployeeIds={[1]}
+        onToggleSelectEmployee={onToggleSelectEmployee}
+        onToggleSelectAll={onToggleSelectAll}
+      />
+    );
+
+    // Row 1 should be selected with row-selected class
+    const row1 = screen.getByTestId('employee-row-1');
+    expect(row1).toHaveClass('row-selected');
+
+    // Row 2 should NOT be selected
+    const row2 = screen.getByTestId('employee-row-2');
+    expect(row2).not.toHaveClass('row-selected');
+
+    // Toggle row 2 checkbox
+    const checkbox2 = screen.getByRole('checkbox', { name: /Select employee Bob Martin/i });
+    checkbox2.click();
+    expect(onToggleSelectEmployee).toHaveBeenCalledWith(2);
+
+    // Toggle select all
+    const selectAllCheckbox = screen.getByRole('checkbox', { name: /Select all employees on current page/i });
+    selectAllCheckbox.click();
+    expect(onToggleSelectAll).toHaveBeenCalled();
+  });
 });

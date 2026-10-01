@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDomain } from '../context/DomainContext';
 import { fetchEmployees } from '../api/employees';
 import { fetchImports } from '../api/imports';
+import { createExport, fetchExport, downloadExportFile } from '../api/exports';
 import EmployeeTable from './EmployeeTable';
 import CreateEmployeeModal from './CreateEmployeeModal';
 import EditEmployeeModal from './EditEmployeeModal';
@@ -28,13 +29,19 @@ export default function EmployeeDirectory() {
     per_page: 25,
   });
 
-  // Modal state
+  // Modal & Export state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [runningImportsCount, setRunningImportsCount] = useState(0);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [viewingCompensationEmployee, setViewingCompensationEmployee] = useState(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
+
+  // Async Export state
+  const [isExporting, setIsExporting] = useState(false);
+  const [activeExport, setActiveExport] = useState(null);
+  const [exportError, setExportError] = useState(null);
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState([]);
 
   useEffect(() => {
     let ignore = false;
@@ -132,6 +139,96 @@ export default function EmployeeDirectory() {
     };
   }, [reloadTrigger, isImportModalOpen]);
 
+  // Poll background export job
+  useEffect(() => {
+    if (!activeExport || activeExport.status === 'completed' || activeExport.status === 'failed') {
+      return;
+    }
+
+    const timer = setInterval(async () => {
+      try {
+        const updated = await fetchExport(activeExport.id);
+        setActiveExport(updated);
+        if (updated.status === 'completed') {
+          clearInterval(timer);
+          try {
+            await downloadExportFile(updated.id, updated.filename);
+          } catch (dlErr) {
+            console.error('Auto-download failed:', dlErr);
+          }
+        } else if (updated.status === 'failed') {
+          clearInterval(timer);
+        }
+      } catch (err) {
+        clearInterval(timer);
+      }
+    }, 1200);
+
+    return () => clearInterval(timer);
+  }, [activeExport?.id, activeExport?.status]);
+
+  const handleStartExport = async () => {
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const job = await createExport({
+        domain_id: selectedDomainId,
+        employment_status: statusFilter,
+        search: searchQuery,
+      });
+      setActiveExport(job);
+    } catch (err) {
+      setExportError(err.message || 'Failed to start export');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleToggleSelectEmployee = (id) => {
+    setSelectedEmployeeIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    const pageIds = (employees || []).map((e) => e.id);
+    const allSelected = pageIds.length > 0 && pageIds.every((id) => selectedEmployeeIds.includes(id));
+    if (allSelected) {
+      setSelectedEmployeeIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    } else {
+      setSelectedEmployeeIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedEmployeeIds([]);
+  };
+
+  const handleExportSelected = async () => {
+    if (selectedEmployeeIds.length === 0) return;
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const job = await createExport({
+        employee_ids: selectedEmployeeIds,
+      });
+      setActiveExport(job);
+    } catch (err) {
+      setExportError(err.message || 'Failed to start export');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleManualDownload = async () => {
+    if (!activeExport?.id) return;
+    try {
+      await downloadExportFile(activeExport.id, activeExport.filename);
+    } catch (err) {
+      setExportError(err.message || 'Download failed');
+    }
+  };
+
   return (
     <div className="employee-directory">
       <div className="directory-header">
@@ -143,6 +240,21 @@ export default function EmployeeDirectory() {
         </div>
 
         <div className="directory-actions">
+          <button
+            type="button"
+            className="btn-secondary btn-export-csv"
+            onClick={handleStartExport}
+            disabled={isExporting}
+            title="Export filtered employee directory and compensation data to CSV"
+          >
+            {isExporting ? (
+              <>
+                <span className="status-spinner" /> 📤 Exporting...
+              </>
+            ) : (
+              '📤 Export CSV'
+            )}
+          </button>
           <button
             type="button"
             className="btn-secondary btn-import-csv"
@@ -165,6 +277,12 @@ export default function EmployeeDirectory() {
           </button>
         </div>
       </div>
+
+      {exportError && (
+        <div className="error-banner" role="alert">
+          ⚠️ {exportError}
+        </div>
+      )}
 
       {error && (
         <div className="error-banner" role="alert">
@@ -214,9 +332,47 @@ export default function EmployeeDirectory() {
         </div>
       </div>
 
+      {selectedEmployeeIds.length > 0 && (
+        <div className="selection-action-bar" role="region" aria-label="Selection actions">
+          <div className="selection-count">
+            <span className="selection-badge">✓</span>
+            <span>
+              <strong>{selectedEmployeeIds.length}</strong> employee
+              {selectedEmployeeIds.length === 1 ? '' : 's'} selected
+            </span>
+          </div>
+          <div className="selection-buttons">
+            <button
+              type="button"
+              className="btn-export-selected"
+              onClick={handleExportSelected}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <>
+                  <span className="status-spinner" /> 📤 Exporting...
+                </>
+              ) : (
+                `📤 Export Selected (${selectedEmployeeIds.length})`
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn-clear-selection"
+              onClick={handleClearSelection}
+            >
+              Clear selection
+            </button>
+          </div>
+        </div>
+      )}
+
       <EmployeeTable
         employees={employees}
         loading={loading}
+        selectedEmployeeIds={selectedEmployeeIds}
+        onToggleSelectEmployee={handleToggleSelectEmployee}
+        onToggleSelectAll={handleToggleSelectAll}
         onEditEmployee={setEditingEmployee}
         onViewCompensation={setViewingCompensationEmployee}
       />
@@ -284,6 +440,56 @@ export default function EmployeeDirectory() {
         }}
         onImportCompleted={() => setReloadTrigger((prev) => prev + 1)}
       />
+
+      {/* Non-blocking Async Export Toast */}
+      {activeExport && (
+        <div className="export-notification-toast" role="status" aria-live="polite">
+          <div className="export-toast-content">
+            <div className="export-toast-header">
+              <span className="export-icon">{activeExport.status === 'completed' ? '✅' : '📤'}</span>
+              <strong>
+                {activeExport.status === 'completed'
+                  ? 'Export Complete!'
+                  : `Generating Export (${activeExport.progress_percentage || 0}%)`}
+              </strong>
+              <button
+                type="button"
+                className="btn-close-toast"
+                onClick={() => setActiveExport(null)}
+                aria-label="Dismiss export notification"
+                title="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="export-toast-sub">
+              {activeExport.filename} ({activeExport.total_rows || 0} rows)
+            </p>
+            {(activeExport.status === 'queued' || activeExport.status === 'processing') && (
+              <div className="export-progress-track">
+                <div
+                  className="export-progress-bar"
+                  style={{ width: `${Math.max(activeExport.progress_percentage || 0, 10)}%` }}
+                />
+              </div>
+            )}
+            {activeExport.status === 'completed' && activeExport.can_download && (
+              <button
+                type="button"
+                className="btn-download-export"
+                onClick={handleManualDownload}
+              >
+                ⬇️ Download CSV File
+              </button>
+            )}
+            {activeExport.status === 'failed' && (
+              <div className="text-danger" style={{ fontSize: '0.8rem' }}>
+                Failed: {activeExport.error_message || 'Internal error'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

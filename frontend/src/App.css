@@ -744,6 +744,28 @@ body {
   background: #f8fafc;
 }
 
+.employee-row.row-selected {
+  background-color: #eff6ff;
+}
+
+.employee-row.row-selected:hover {
+  background-color: #dbeafe;
+}
+
+.select-col {
+  width: 44px;
+  text-align: center;
+  padding: 0.75rem 0.5rem !important;
+}
+
+.select-checkbox {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: #2563eb;
+  vertical-align: middle;
+}
+
 .font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.825rem;
@@ -2212,6 +2234,220 @@ body {
 .btn-confirm-warning:hover:not(:disabled) {
   background: #6d28d9;
 }
+
+/* ==========================================================================
+   Bulk CSV Export Styles
+   ========================================================================== */
+.btn-export-csv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.btn-export-csv:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.export-notification-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 90;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  width: 340px;
+  animation: slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.export-toast-content {
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.export-toast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.export-toast-header strong {
+  font-size: 0.925rem;
+  color: #0f172a;
+  flex: 1;
+}
+
+.export-icon {
+  font-size: 1.15rem;
+}
+
+.btn-close-toast {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.2rem;
+  font-size: 0.9rem;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.btn-close-toast:hover {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+.export-toast-sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  word-break: break-all;
+}
+
+.export-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 0.25rem 0;
+}
+
+.export-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.btn-download-export {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: 0.25rem;
+}
+
+.btn-download-export:hover {
+  background: #059669;
+}
+
+/* Selection Action Bar */
+.selection-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 1rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.selection-count {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  color: #166534;
+}
+
+.selection-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #16a34a;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.selection-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-export-selected {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-export-selected:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.btn-export-selected:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-clear-selection {
+  background: transparent;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.825rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-clear-selection:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #94a3b8;
+}
+
 
 
 

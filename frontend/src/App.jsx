@@ -1,14 +1,16 @@
+import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DomainProvider, useDomain } from './context/DomainContext';
 import Navbar from './components/Navbar';
 import LoginForm from './components/LoginForm';
-import './App.css';
-
 import EmployeeDirectory from './components/EmployeeDirectory';
+import ReportsDashboard from './components/ReportsDashboard';
+import './App.css';
 
 function MainContent() {
   const { user, loading } = useAuth();
   const { isAllDomains, activeDomain } = useDomain();
+  const [activeTab, setActiveTab] = useState('directory');
 
   if (loading) {
     return (
@@ -74,7 +76,28 @@ function MainContent() {
             </div>
           </div>
 
-          <EmployeeDirectory />
+          <div className="view-navigation-tabs" role="tablist" aria-label="Main Navigation">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'directory'}
+              className={`view-nav-tab ${activeTab === 'directory' ? 'active' : ''}`}
+              onClick={() => setActiveTab('directory')}
+            >
+              👥 Employee Directory
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'insights'}
+              className={`view-nav-tab ${activeTab === 'insights' ? 'active' : ''}`}
+              onClick={() => setActiveTab('insights')}
+            >
+              📊 Insights & Analytics
+            </button>
+          </div>
+
+          {activeTab === 'directory' ? <EmployeeDirectory /> : <ReportsDashboard />}
         </div>
       </main>
     </div>

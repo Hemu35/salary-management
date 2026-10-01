@@ -8,20 +8,20 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   workers: 1,
   timeout: 60000,
   expect: {
     timeout: 10000,
   },
-  reporter: 'list',
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     launchOptions: {
-      slowMo: process.env.SLOWMO ? parseInt(process.env.SLOWMO) : 50,
+      slowMo: process.env.SLOWMO ? parseInt(process.env.SLOWMO) : (process.env.CI ? 0 : 50),
     },
   },
   projects: [

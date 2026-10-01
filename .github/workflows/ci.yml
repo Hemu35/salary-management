@@ -1,0 +1,127 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1. Frontend Unit Tests (Vitest & React Testing Library)
+  frontend-unit-tests:
+    name: Frontend Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run Unit Tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: Run Linter
+        working-directory: ./frontend
+        run: npm run lint
+
+  # 2. Backend RSpec Tests (PostgreSQL RLS + Redis + Sidekiq)
+  backend-rspec-tests:
+    name: Backend Tests (RSpec)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Free host ports (stop default Ubuntu postgres/redis)
+        run: |
+          sudo systemctl stop postgresql || true
+          sudo systemctl stop redis-server || true
+
+      - name: Start Database & Redis
+        run: docker compose up -d db redis
+
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 60 bash -c 'until docker compose exec -T db pg_isready -U postgres -d compensation_dev; do echo "Waiting for postgres..."; sleep 2; done'
+
+      - name: Run RSpec Test Suite
+        run: |
+          docker compose run --rm -e RAILS_ENV=test backend bash -c "bundle exec rails db:prepare && bundle exec rspec"
+
+      - name: Stop Containers
+        if: always()
+        run: docker compose down -v
+
+  # 3. Full-Stack End-to-End Browser Tests (Playwright Chromium)
+  e2e-playwright-tests:
+    name: E2E Browser Tests (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Free host ports (stop default Ubuntu postgres/redis)
+        run: |
+          sudo systemctl stop postgresql || true
+          sudo systemctl stop redis-server || true
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install Playwright Chromium with Dependencies
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Docker Compose Stack
+        run: docker compose up -d --build
+
+      - name: Wait for Backend and Frontend Services
+        run: |
+          echo "Waiting for backend (:3001/health/live) and frontend (:3000)..."
+          timeout 120 bash -c 'until curl -sf http://localhost:3001/health/live > /dev/null && curl -sf http://localhost:3000 > /dev/null; do sleep 2; done'
+          echo "All services are up and responding!"
+
+      - name: Seed Database
+        run: docker compose exec -T backend bundle exec rails db:seed
+
+      - name: Run Playwright E2E Tests
+        working-directory: ./frontend
+        env:
+          CI: true
+        run: npx playwright test
+
+      - name: Upload Playwright Test Artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 7
+
+      - name: Stop Docker Compose Stack
+        if: always()
+        run: docker compose down -v

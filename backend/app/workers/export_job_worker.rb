@@ -81,7 +81,7 @@ class ExportJobWorker
       processed_count = 0
 
       CSV.open(file_path, "w", write_headers: true, headers: headers) do |csv|
-        scope.find_each(batch_size: 50) do |emp|
+        scope.find_each(batch_size: 1_000) do |emp|
           active_comp = emp.compensation_records.find { |r| r.status == "active" }
 
           base_comp = active_comp&.compensation_components&.find { |c| c.component_type == "base_salary" }
@@ -113,7 +113,7 @@ class ExportJobWorker
           ]
 
           processed_count += 1
-          if (processed_count % 10).zero? || processed_count == total_rows
+          if (processed_count % 250).zero? || processed_count == total_rows
             job.update_columns(processed_rows: processed_count)
           end
         end

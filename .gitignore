@@ -6,6 +6,7 @@ Thumbs.db
 
 # Extracted txt files (temp, not part of codebase)
 *.txt
+*.csv
 extract_docs.ps1
 
 # Rails

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Health endpoints", type: :request do
@@ -30,6 +32,21 @@ RSpec.describe "Health endpoints", type: :request do
       get "/health/ready"
       expect(response).to have_http_status(:service_unavailable)
       expect(JSON.parse(response.body)["status"]).to eq("error")
+    end
+  end
+
+  describe "GET /health/workers (HEALTH-03)" do
+    it "returns worker metrics, queue latency, and processed/failed stats" do
+      get "/health/workers"
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["status"]).to eq("ok")
+      expect(body).to have_key("active_workers")
+      expect(body).to have_key("processed_jobs")
+      expect(body).to have_key("failed_jobs")
+      expect(body).to have_key("enqueued_jobs")
+      expect(body).to have_key("queues")
+      expect(body).to have_key("default_latency_seconds")
     end
   end
 end

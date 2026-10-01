@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
   # Health checks — liveness must not require auth (used by ECS/ALB)
-  get "/health/live",  to: "health#live"
-  get "/health/ready", to: "health#ready"
+  get "/health/live",    to: "health#live"
+  get "/health/ready",   to: "health#ready"
+  get "/health/workers", to: "health#workers"
 
   namespace :api do
     # Authentication

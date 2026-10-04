@@ -125,6 +125,13 @@ Replace fragmented spreadsheets with a centralized, secure, multi-tenant web app
 - Passwords hashed with BCrypt (cost factor 12).
 - Zero credential logging: Passwords, session tokens, and raw salary amounts are filtered from application logs (`config.filter_parameters`).
 - Audit logging: Sensitive operations (employee creation, salary adjustments, import rollbacks) record actor ID, action, timestamp, and affected resource IDs.
+- **Rate Limiting (via `rack-attack`):** Three tiers of throttling protect the application from brute-force attacks and abuse:
+  - **Login endpoint (`POST /api/session`):** Maximum **5 requests per IP per minute**. Excess requests receive `429 Too Many Requests`. Prevents brute-force password attacks.
+  - **General API endpoints:** Maximum **300 requests per authenticated user per minute**. Handles normal HR usage (search, filters, pagination) without restriction while blocking automated scraping.
+  - **Bulk endpoints (`POST /api/imports`, `POST /api/exports`):** Maximum **10 requests per user per hour**. Prevents resource exhaustion from queuing excessive background jobs.
+- **Blocklisting:** IP addresses that exceed login rate limits 3 times within 10 minutes are temporarily blocked for 1 hour.
+- **Safe-listed:** Health check endpoints (`/health/live`, `/health/ready`, `/health/workers`) are exempt from rate limiting to prevent false load-balancer failures.
+- **Implementation:** `rack-attack` gem backed by Redis (same Redis instance as Sidekiq) for distributed counter storage — counters survive process restarts and work correctly across multiple Rails containers.
 
 ### 5.11 Deterministic 10,000-Employee Benchmark Seed
 - Deterministic benchmark generator (`BenchmarkSeedService`) executed via `rake db:seed:benchmark`.
@@ -164,6 +171,7 @@ The following capabilities are classified as P1 enhancements and are deferred be
 ## 8. Non-Functional Requirements
 
 - **Security & Isolation:** Every query, filter, report, and file download enforces tenant and department authorization server-side. PostgreSQL RLS active on all tenant tables.
+- **Rate Limiting:** Login endpoint throttled to 5 req/IP/min; general API to 300 req/user/min; bulk job endpoints to 10 req/user/hour. Counters backed by Redis for multi-container correctness. Health endpoints are safe-listed.
 - **Data Integrity:** Historical compensation packages are immutable. Monetary values use fixed-point arithmetic (`DECIMAL(15,2)` / `BigDecimal`).
 - **High Performance:**
   - 10,000-employee directory search & filter: **< 40 ms** latency.
@@ -194,6 +202,7 @@ The system is considered complete and accepted when all the following criteria a
 13. **Deterministic Seed:** Running `rake db:seed:benchmark` populates exactly 10,000 synthetic employees across 9 countries and currencies in under 10 seconds (measured: 6.12s), and skips re-runs idempotently in 0.01 seconds.
 14. **Production Health Checks:** `/health/live`, `/health/ready`, and `/health/workers` accurately report application, dependency, and Sidekiq worker health.
 15. **Automated Quality:** Full test suite passes with **100% green status** (323 tests: 230 RSpec, 62 Vitest, 31 Playwright).
+16. **Rate Limiting:** Sending more than 5 login attempts per minute from a single IP returns `429 Too Many Requests` with a `Retry-After` header. General API and bulk endpoints respect their respective throttle limits without affecting health check availability.
 
 ---
 
